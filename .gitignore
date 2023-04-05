@@ -1,0 +1,6 @@
+marvel-env
+__pycache__
+.DS_Store
+.vscode
+.vsconfig
+.vercel
