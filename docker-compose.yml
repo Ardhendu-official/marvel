@@ -10,8 +10,8 @@ services:
     ports:
         - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: aellink
-      MYSQL_DATABASE: aellink
+      MYSQL_ROOT_PASSWORD: marvel
+      MYSQL_DATABASE: marvel
 
   adminer:
     image: adminer

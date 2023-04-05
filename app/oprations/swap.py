@@ -29,7 +29,7 @@ def show_swap_pair(asset: str, db: Session = Depends(get_db)):
     assets = db.query(DbSwapAsset).filter(DbSwapAsset.asset_symbol == asset).first()
     if assets:
         ass = asset.lower()
-        url = 'http://13.234.52.167:2352/api/v1/swap/pair/'
+        url = 'http://13.235.171.121:2352/api/v1/swap/pair/'
         body = {"name": ass}
         headers = {'Content-type': 'application/json'}
         response = requests.get(url, json=body, headers=headers)
@@ -45,7 +45,7 @@ def show_swap_pair(asset: str, db: Session = Depends(get_db)):
         return []
 
 def show_swap_trx(db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/pair/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/pair/'
     body = {"name": "trx"}
     headers = {'Content-type': 'application/json'}
     response = requests.get(url, json=body, headers=headers)
@@ -59,7 +59,7 @@ def show_swap_trx(db: Session = Depends(get_db)):
     return acc
 
 def show_swap_usdt(db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/pair/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/pair/'
     body = {"name": "usdttrc20"}
     headers = {'Content-type': 'application/json'}
     response = requests.get(url, json=body, headers=headers)
@@ -73,7 +73,7 @@ def show_swap_usdt(db: Session = Depends(get_db)):
     return acc
 
 def show_swap_curency(asset: str, db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/curency/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/curency/'
     body = {"name": asset}
     headers = {'Content-type': 'application/json'}
     response = requests.get(url, json=body, headers=headers)
@@ -81,14 +81,14 @@ def show_swap_curency(asset: str, db: Session = Depends(get_db)):
     return res
 
 def show_swap_curency_all(db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/curency/all/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/curency/all/'
     headers = {'Content-type': 'application/json'}
     response = requests.get(url, headers=headers)
     res = response.json()
     return res
 
 def show_swap_estimated(currency_from: str, currency_to: str, amount:str, db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/estimated/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/estimated/'
     body = {
         "currency_from": currency_from,
         "currency_to": currency_to,
@@ -100,8 +100,8 @@ def show_swap_estimated(currency_from: str, currency_to: str, amount:str, db: Se
     return res
 
 def show_swap_minimal(currency_from: str, currency_to: str, amount:str, db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/minimal/'
-    url_1 = 'http://13.234.52.167:2352/api/v1/swap/estimated/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/minimal/'
+    url_1 = 'http://13.235.171.121:2352/api/v1/swap/estimated/'
     body_1 = {
         "currency_from": currency_from,
         "currency_to": currency_to,
@@ -125,7 +125,7 @@ def show_swap_minimal(currency_from: str, currency_to: str, amount:str, db: Sess
     return data
 
 def show_swap_range(currency_from: str, currency_to: str, db: Session = Depends(get_db)):
-    url = 'http://13.234.52.167:2352/api/v1/swap/range/'
+    url = 'http://13.235.171.121:2352/api/v1/swap/range/'
     body = {
         "currency_from": currency_from,
         "currency_to": currency_to
@@ -137,7 +137,7 @@ def show_swap_range(currency_from: str, currency_to: str, db: Session = Depends(
 
 def create_swap(request: Exchange ,db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(and_(DbUser.user_address == request.address_to, DbUser.user_hash_id == request.user_hash_id)).first()
-    url_amount = 'http://13.234.52.167:2352/api/v1/swap/minimal/'
+    url_amount = 'http://13.235.171.121:2352/api/v1/swap/minimal/'
     body_amount = {
         "currency_from": request.currency_from,
         "currency_to": request.currency_to
@@ -146,7 +146,7 @@ def create_swap(request: Exchange ,db: Session = Depends(get_db)):
     response_amount = requests.get(url_amount, json=body_amount, headers=headers_amount)
     res_amount = response_amount.json()
     if user and float(res_amount['min_amount']) <= float(request.amount_from):
-        url = 'http://13.234.52.167:2352/api/v1/swap/exchange/create/'
+        url = 'http://13.235.171.121:2352/api/v1/swap/exchange/create/'
         body = {
             "currency_from": request.currency_from,
             "currency_to": request.currency_to,
@@ -157,7 +157,7 @@ def create_swap(request: Exchange ,db: Session = Depends(get_db)):
         response = requests.post(url, json=body, headers=headers)
         res = response.json()
 
-        url= 'http://13.234.52.167:2352/api/v1/tron/wallet/send'
+        url= 'http://13.235.171.121:2352/api/v1/tron/wallet/send'
         body = {"from_account": request.address_to,
                 "to_account": res["address_from"],
                 "amount": float(res["expected_amount"])*1000000,
@@ -199,7 +199,7 @@ def show_swap_trans(user_hash_id: str, user_address: str, db: Session = Depends(
     else:
         for trax in trans:
             if not trax.transaction_status == "finished":
-                url = 'http://13.234.52.167:2352/api/v1/swap/exchange/id/'
+                url = 'http://13.235.171.121:2352/api/v1/swap/exchange/id/'
                 body = {
                     "exchange_id": trax.transaction_tx_id
                 }
@@ -223,7 +223,7 @@ def all_swap_trans(db: Session = Depends(get_db)):
     else:
         for trax in trans:
             if not trax.transaction_status == "finished":
-                url = 'http://13.234.52.167:2352/api/v1/swap/exchange/id/'
+                url = 'http://13.235.171.121:2352/api/v1/swap/exchange/id/'
                 body = {
                     "exchange_id": trax.transaction_tx_id
                 }

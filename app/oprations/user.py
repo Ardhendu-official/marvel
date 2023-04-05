@@ -31,7 +31,7 @@ def get_db():
 
 def create_new_wallet(request: User, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(DbUser.user_hash_id == request.user_hash_id).first()
-    url= "http://13.234.52.167:2352/api/v1/tron/account"
+    url= "http://13.235.171.121:2352/api/v1/tron/account"
     response = requests.post(url)
     wallet_details = response.json()
     hash_id = 'AL'+uuid.uuid1().hex[:8]
@@ -108,13 +108,13 @@ def import_wallet(request: ImportWallet, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(DbUser.user_hash_id == request.user_hash_id).all()
     mnemonic_key = ismnemonickey(request.m_key_or_p_key) 
     if mnemonic_key["status"] == True:
-        url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/phase"
+        url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/phase"
         body = {"phase": request.m_key_or_p_key}
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
         wallet_details = response.json()
     else:
-        url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/private"
+        url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/private"
         body = {"pkey": request.m_key_or_p_key}
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -125,13 +125,13 @@ def import_wallet(request: ImportWallet, db: Session = Depends(get_db)):
                             detail=f"address already added") 
         else:
             if mnemonic_key["status"] == True:
-                url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/phase"
+                url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/phase"
                 body = {"phase": request.m_key_or_p_key}
                 headers = {'Content-type': 'application/json'}
                 response = requests.post(url,json=body,headers=headers)
                 wallet_details = response.json()
             else:
-                url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/private"
+                url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/private"
                 body = {"pkey": request.m_key_or_p_key}
                 headers = {'Content-type': 'application/json'}
                 response = requests.post(url,json=body,headers=headers)
@@ -176,13 +176,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
         mnemonic_key = request.m_key_or_p_key.split()
         # return mnemonic_key
         if mnemonic_key.__len__() == 12:
-            url= "http://13.234.52.167:2352/api/v1/eth/wallet/import/phase"
+            url= "http://13.235.171.121:2352/api/v1/eth/wallet/import/phase"
             body = {"mkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
             wallet_details = response.json()
         else:
-            url= "http://13.234.52.167:2352/api/v1/eth/wallet/import/private"
+            url= "http://13.235.171.121:2352/api/v1/eth/wallet/import/private"
             body = {"pkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
@@ -193,13 +193,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                                 detail=f"address already added") 
             else:
                 if mnemonic_key.__len__() == 12:
-                    url= "http://13.234.52.167:2352/api/v1/eth/wallet/import/phase"
+                    url= "http://13.235.171.121:2352/api/v1/eth/wallet/import/phase"
                     body = {"mkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
                 else:
-                    url= "http://13.234.52.167:2352/api/v1/eth/wallet/import/private"
+                    url= "http://13.235.171.121:2352/api/v1/eth/wallet/import/private"
                     body = {"pkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
@@ -241,13 +241,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
         mnemonic_key = request.m_key_or_p_key.split()
         # return mnemonic_key
         if mnemonic_key.__len__() == 12:
-            url= "http://13.234.52.167:2352/api/v1/bnb/wallet/import/phase"
+            url= "http://13.235.171.121:2352/api/v1/bnb/wallet/import/phase"
             body = {"mkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
             wallet_details = response.json()
         else:
-            url= "http://13.234.52.167:2352/api/v1/bnb/wallet/import/private"
+            url= "http://13.235.171.121:2352/api/v1/bnb/wallet/import/private"
             body = {"pkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
@@ -258,13 +258,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                                 detail=f"address already added") 
             else:
                 if mnemonic_key.__len__() == 12:
-                    url= "http://13.234.52.167:2352/api/v1/bnb/wallet/import/phase"
+                    url= "http://13.235.171.121:2352/api/v1/bnb/wallet/import/phase"
                     body = {"mkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
                 else:
-                    url= "http://13.234.52.167:2352/api/v1/bnb/wallet/import/private"
+                    url= "http://13.235.171.121:2352/api/v1/bnb/wallet/import/private"
                     body = {"pkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
@@ -306,13 +306,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
         mnemonic_key = request.m_key_or_p_key.split()
         # return mnemonic_key
         if mnemonic_key.__len__() == 12:
-            url= "http://13.234.52.167:2352/api/v1/polygon/wallet/import/phase"
+            url= "http://13.235.171.121:2352/api/v1/polygon/wallet/import/phase"
             body = {"mkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
             wallet_details = response.json()
         else:
-            url= "http://13.234.52.167:2352/api/v1/polygon/wallet/import/private"
+            url= "http://13.235.171.121:2352/api/v1/polygon/wallet/import/private"
             body = {"pkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
@@ -323,13 +323,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                                 detail=f"address already added") 
             else:
                 if mnemonic_key.__len__() == 12:
-                    url= "http://13.234.52.167:2352/api/v1/polygon/wallet/import/phase"
+                    url= "http://13.235.171.121:2352/api/v1/polygon/wallet/import/phase"
                     body = {"mkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
                 else:
-                    url= "http://13.234.52.167:2352/api/v1/polygon/wallet/import/private"
+                    url= "http://13.235.171.121:2352/api/v1/polygon/wallet/import/private"
                     body = {"pkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
@@ -371,13 +371,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
         mnemonic_key = request.m_key_or_p_key.split()
         # return mnemonic_key
         if mnemonic_key.__len__() == 12:
-            url= "http://13.234.52.167:2352/api/v1/solana/wallet/import/phase"
+            url= "http://13.235.171.121:2352/api/v1/solana/wallet/import/phase"
             body = {"mkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
             wallet_details = response.json()
         else:
-            url= "http://13.234.52.167:2352/api/v1/solana/wallet/import/private"
+            url= "http://13.235.171.121:2352/api/v1/solana/wallet/import/private"
             body = {"pkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
@@ -388,13 +388,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                                 detail=f"address already added") 
             else:
                 if mnemonic_key.__len__() == 12:
-                    url= "http://13.234.52.167:2352/api/v1/solana/wallet/import/phase"
+                    url= "http://13.235.171.121:2352/api/v1/solana/wallet/import/phase"
                     body = {"mkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
                 else:
-                    url= "http://13.234.52.167:2352/api/v1/solana/wallet/import/private"
+                    url= "http://13.235.171.121:2352/api/v1/solana/wallet/import/private"
                     body = {"pkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
@@ -435,13 +435,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
     elif request.user_network == "trx":
         mnemonic_key = ismnemonickey(request.m_key_or_p_key) 
         if mnemonic_key["status"] == True:
-            url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/phase"
+            url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/phase"
             body = {"phase": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
             wallet_details = response.json()
         else:
-            url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/private"
+            url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/private"
             body = {"pkey": request.m_key_or_p_key}
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
@@ -452,13 +452,13 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                                 detail=f"address already added") 
             else:
                 if mnemonic_key["status"] == True:
-                    url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/phase"
+                    url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/phase"
                     body = {"phase": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
                 else:
-                    url= "http://13.234.52.167:2352/api/v1/tron/wallet/import/private"
+                    url= "http://13.235.171.121:2352/api/v1/tron/wallet/import/private"
                     body = {"pkey": request.m_key_or_p_key}
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
@@ -502,7 +502,7 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
 
 def details_wallet(request: WalletDetails, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(DbUser.user_hash_id == request.user_hash_id).first()
-    url= "http://13.234.52.167:2352/api/v1/tron/wallet/details"
+    url= "http://13.235.171.121:2352/api/v1/tron/wallet/details"
     body = {"address": request.user_address}           # type: ignore
     headers = {'Content-type': 'application/json'}
     response = requests.post(url,json=body,headers=headers)
@@ -541,7 +541,7 @@ def details_wallet(request: WalletDetails, db: Session = Depends(get_db)):
 
 def details_wallet_bal(request: ImportWallet, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(DbUser.user_hash_id == request.user_hash_id).first()
-    url= "http://13.234.52.167:2352/api/v1/tron/wallet/balance"
+    url= "http://13.235.171.121:2352/api/v1/tron/wallet/balance"
     body = {"address": request.user_address}           # type: ignore
     headers = {'Content-type': 'application/json'}
     response = requests.post(url,json=body,headers=headers)
@@ -563,7 +563,7 @@ def show_user_wallet(hash_id: str , db: Session = Depends(get_db)):
     data = []
     if user:
         for u_detalis in user:
-            url= "http://13.234.52.167:2352/api/v1/tron/wallet/details"
+            url= "http://13.235.171.121:2352/api/v1/tron/wallet/details"
             body = {"address": u_detalis.user_address}           # type: ignore
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
@@ -588,7 +588,7 @@ def show_user_wallet(hash_id: str , db: Session = Depends(get_db)):
 def send_trx(request: sendTron, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(and_(DbUser.user_address == request.from_account, DbUser.user_hash_id == request.user_hash_id)).first()
     if user and request.amount >= 10000:
-        url= 'http://13.234.52.167:2352/api/v1/tron/wallet/send'
+        url= 'http://13.235.171.121:2352/api/v1/tron/wallet/send'
         body = {"from_account": request.from_account,
                 "to_account": request.to_account,
                 "amount": request.amount,
@@ -1442,7 +1442,7 @@ def number_of_network_trans_receive(argument, start, address):
 
 def number_of_network_create(argument): 
     if argument =="trx":
-        url= "http://13.234.52.167:2352/api/v1/tron/account"
+        url= "http://13.235.171.121:2352/api/v1/tron/account"
         response = requests.post(url)
         wallet_details = response.json()
         data = {
@@ -1455,7 +1455,7 @@ def number_of_network_create(argument):
         }
         return data
     elif argument == "eth":
-        url= "http://13.234.52.167:2352/api/v1/eth/account"
+        url= "http://13.235.171.121:2352/api/v1/eth/account"
         response = requests.post(url)
         wallet_details = response.json()
         data = {
@@ -1468,7 +1468,7 @@ def number_of_network_create(argument):
         }
         return data
     elif argument == "bnb":
-        url= "http://13.234.52.167:2352/api/v1/bnb/account"
+        url= "http://13.235.171.121:2352/api/v1/bnb/account"
         response = requests.post(url)
         wallet_details = response.json()
         data = {
@@ -1481,7 +1481,7 @@ def number_of_network_create(argument):
         }
         return data
     elif argument == "polygon":
-        url= "http://13.234.52.167:2352/api/v1/polygon/account"
+        url= "http://13.235.171.121:2352/api/v1/polygon/account"
         response = requests.post(url)
         wallet_details = response.json()
         data = {
@@ -1494,7 +1494,7 @@ def number_of_network_create(argument):
         }
         return data
     elif argument == "solana":
-        url= "http://13.234.52.167:2352/api/v1/solana/account"
+        url= "http://13.235.171.121:2352/api/v1/solana/account"
         response = requests.post(url)
         wallet_details = response.json()
         data = {
@@ -1560,7 +1560,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                 }
                 data.append(token_details)
         data_tk =[]
-        url= "http://13.234.52.167:2352/api/v1/tron/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/tron/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -1677,7 +1677,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                     "tokenLogo": token.token_logo,          # type: ignore
                 }
                 data.append(token_details)
-        url= "http://13.234.52.167:2352/api/v1/eth/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/eth/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -1791,7 +1791,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                     "tokenLogo": token.token_logo,          # type: ignore
                 }
                 data.append(token_details)
-        url= "http://13.234.52.167:2352/api/v1/bnb/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/bnb/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -1905,7 +1905,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                     "tokenLogo": token.token_logo,          # type: ignore
                 }
                 data.append(token_details)
-        url= "http://13.234.52.167:2352/api/v1/polygon/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/polygon/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -1999,7 +1999,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                     "tokenLogo": token.token_logo,          # type: ignore
                 }
                 data.append(token_details)
-        url= "http://13.234.52.167:2352/api/v1/solana/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/solana/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -2071,7 +2071,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
 
 def number_of_network_wallet_list(argument, address): 
     if argument =="trx":
-        url= "http://13.234.52.167:2352/api/v1/tron/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/tron/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -2083,7 +2083,7 @@ def number_of_network_wallet_list(argument, address):
         }
         return final_data
     elif argument == "eth":
-        url= "http://13.234.52.167:2352/api/v1/eth/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/eth/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -2095,7 +2095,7 @@ def number_of_network_wallet_list(argument, address):
         }
         return data
     elif argument == "bnb":
-        url= "http://13.234.52.167:2352/api/v1/bnb/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/bnb/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -2107,7 +2107,7 @@ def number_of_network_wallet_list(argument, address):
         }
         return data
     elif argument == "polygon":
-        url= "http://13.234.52.167:2352/api/v1/polygon/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/polygon/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -2119,7 +2119,7 @@ def number_of_network_wallet_list(argument, address):
         }
         return data
     elif argument == "solana":
-        url= "http://13.234.52.167:2352/api/v1/solana/wallet/details"
+        url= "http://13.235.171.121:2352/api/v1/solana/wallet/details"
         body = {"address": address}           # type: ignore
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
@@ -2136,7 +2136,7 @@ def number_of_network_wallet_list(argument, address):
 def number_of_network_send(argument, from_account, to_account, amount, user_privateKey): 
     if argument =="trx":
         if float(amount) >= 0.001:
-            url= 'http://13.234.52.167:2352/api/v1/tron/wallet/send'
+            url= 'http://13.235.171.121:2352/api/v1/tron/wallet/send'
             body = {"from_account": from_account,
             "to_account": to_account,
             "amount": amount * 1000000,
@@ -2170,7 +2170,7 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
                                 detail=f"amount is to low")
     elif argument == "eth":
         if amount >= 0.00000000001:
-            url_e= 'http://13.234.52.167:2352/api/v1/eth/wallet/send'
+            url_e= 'http://13.235.171.121:2352/api/v1/eth/wallet/send'
             body_e = {"from_account": from_account,
             "to_account": to_account,
             "amount": str(amount),
@@ -2203,7 +2203,7 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
                               detail=f"amount is to low")
     elif argument == "bnb":
         if amount >= 0.00000000001:
-            url_e= 'http://13.234.52.167:2352/api/v1/bnb/wallet/send'
+            url_e= 'http://13.235.171.121:2352/api/v1/bnb/wallet/send'
             body_e = {"from_account": from_account,
             "to_account": to_account,
             "amount": str(amount),
@@ -2236,7 +2236,7 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
                               detail=f"amount is to low")
     elif argument == "polygon":
         if amount >= 0.00000000001:
-            url_e= 'http://13.234.52.167:2352/api/v1/polygon/wallet/send'
+            url_e= 'http://13.235.171.121:2352/api/v1/polygon/wallet/send'
             body_e = {"from_account": from_account,
             "to_account": to_account,
             "amount": str(amount),
@@ -2255,7 +2255,7 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
                               detail=f"amount is to low")
     elif argument == "solana":
         if amount >= 0.00000001:
-            url_e= 'http://13.234.52.167:2352/api/v1/solana/wallet/send'
+            url_e= 'http://13.235.171.121:2352/api/v1/solana/wallet/send'
             body_e = {"from_account": from_account,
             "to_account": to_account,
             "amount": str(amount),
@@ -2277,7 +2277,7 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
                               detail=f"something worng")
 
 def ismnemonickey(mkey):  # type: ignore
-    url= "http://13.234.52.167:2352/api/v1/tron/isphase"
+    url= "http://13.235.171.121:2352/api/v1/tron/isphase"
     body = {"phase": mkey}
     headers = {'Content-type': 'application/json'}
     response = requests.post(url,json=body,headers=headers)
