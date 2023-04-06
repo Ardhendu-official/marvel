@@ -21,4 +21,5 @@ class DbUser(Base):
     user_token_id = Column(String(255))
     user_show = Column(String(255))
     user_network = Column(String(255))
+    user_referral_code = Column(String(255))
     

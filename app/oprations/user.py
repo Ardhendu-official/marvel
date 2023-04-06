@@ -1,5 +1,7 @@
-import asyncio
 import json
+import random
+import string
+import time
 import uuid
 from datetime import datetime
 from typing import List, Optional
@@ -67,11 +69,13 @@ def create_new_wallet(request: User, db: Session = Depends(get_db)):
 
 def create_wallet(request: UserNew, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(DbUser.user_hash_id == request.user_hash_id).first()
-    if request.user_network =='trx' or request.user_network =='eth' or request.user_network =='bnb' or request.user_network =='polygon' or request.user_network =='solana':
+    # if request.user_network =='trx' or request.user_network =='eth' or request.user_network =='bnb' or request.user_network =='polygon' or request.user_network =='solana':
+    if request.user_network =='trx' or request.user_network =='bnb':
         wallet_details = number_of_network_create(request.user_network)
     else:
         return {"msg": "something worng"}
-    hash_id = 'AL'+uuid.uuid1().hex[:8]
+    hash_id = 'MW'+uuid.uuid1().hex[:8]
+    referral_code = generate_unique_number()
     if user:
         new_user = DbUser(
             user_hash_id= request.user_hash_id,
@@ -82,7 +86,8 @@ def create_wallet(request: UserNew, db: Session = Depends(get_db)):
             user_mnemonic_key = wallet_details["phase"],               # type: ignore
             user_address = wallet_details["account"]["address"],       # type: ignore
             user_show = "true",
-            user_network = wallet_details["network"]               # type: ignore
+            user_network = wallet_details["network"],               # type: ignore
+            user_referral_code = user.user_referral_code          
         )
         db.add(new_user)
         db.commit()
@@ -97,7 +102,8 @@ def create_wallet(request: UserNew, db: Session = Depends(get_db)):
             user_mnemonic_key = wallet_details["phase"],                  # type: ignore
             user_address = wallet_details["account"]["address"],         # type: ignore
             user_show = "true",
-            user_network = wallet_details["network"]               # type: ignore
+            user_network = wallet_details["network"],               # type: ignore
+            user_referral_code = referral_code
         )
         db.add(user)
         db.commit()
@@ -905,6 +911,8 @@ def show_all_note_transaction(address: str, network: str, db: Session = Depends(
     reacharge_responce = number_of_network_trans_note(network, start, address)
     return reacharge_responce
 
+def random_number(number: int, db: Session = Depends(get_db)):             # type: ignore
+    return generate_unique_number()
 
 
 
@@ -1278,7 +1286,7 @@ def number_of_network_trans_send(argument, start, address):
                         "transaction_date_time": int(dt["timeStamp"]),
                         "transaction_status": True,
                         "token_decimal": 18,
-                        "network": "bnb"
+                        "network": "polygon"
                     }
                     data.append(dat)
             return [data.__len__(), data]
@@ -1305,7 +1313,7 @@ def number_of_network_trans_send(argument, start, address):
                     "transaction_date_time": int(dt["timeStamp"]),
                     "transaction_status": True,
                     "token_decimal": 18,
-                    "network": "bnb"
+                    "network": "solana"
                 }
                 data.append(dat)
             return [data.__len__(), data]
@@ -1454,19 +1462,19 @@ def number_of_network_create(argument):
             "network": "trx"
         }
         return data
-    elif argument == "eth":
-        url= "http://13.235.171.121:2352/api/v1/eth/account"
-        response = requests.post(url)
-        wallet_details = response.json()
-        data = {
-            "account": {
-                "privateKey": wallet_details["account"]["privateKey"],
-                "address": wallet_details["account"]["address"]
-            },
-            "phase": wallet_details["phase"],
-            "network": "eth"
-        }
-        return data
+    # elif argument == "eth":
+    #     url= "http://13.235.171.121:2352/api/v1/eth/account"
+    #     response = requests.post(url)
+    #     wallet_details = response.json()
+    #     data = {
+    #         "account": {
+    #             "privateKey": wallet_details["account"]["privateKey"],
+    #             "address": wallet_details["account"]["address"]
+    #         },
+    #         "phase": wallet_details["phase"],
+    #         "network": "eth"
+    #     }
+    #     return data
     elif argument == "bnb":
         url= "http://13.235.171.121:2352/api/v1/bnb/account"
         response = requests.post(url)
@@ -1480,49 +1488,38 @@ def number_of_network_create(argument):
             "network": "bnb"
         }
         return data
-    elif argument == "polygon":
-        url= "http://13.235.171.121:2352/api/v1/polygon/account"
-        response = requests.post(url)
-        wallet_details = response.json()
-        data = {
-            "account": {
-                "privateKey": wallet_details["account"]["privateKey"],
-                "address": wallet_details["account"]["address"]
-            },
-            "phase": wallet_details["phase"],
-            "network": "polygon"
-        }
-        return data
-    elif argument == "solana":
-        url= "http://13.235.171.121:2352/api/v1/solana/account"
-        response = requests.post(url)
-        wallet_details = response.json()
-        data = {
-            "account": {
-                "privateKey": wallet_details["account"]["privateKey"],
-                "address": wallet_details["account"]["address"]
-            },
-            "phase": wallet_details["phase"],
-            "network": "solana"
-        }
-        return data
+    # elif argument == "polygon":
+    #     url= "http://13.235.171.121:2352/api/v1/polygon/account"
+    #     response = requests.post(url)
+    #     wallet_details = response.json()
+    #     data = {
+    #         "account": {
+    #             "privateKey": wallet_details["account"]["privateKey"],
+    #             "address": wallet_details["account"]["address"]
+    #         },
+    #         "phase": wallet_details["phase"],
+    #         "network": "polygon"
+    #     }
+    #     return data
+    # elif argument == "solana":
+    #     url= "http://13.235.171.121:2352/api/v1/solana/account"
+    #     response = requests.post(url)
+    #     wallet_details = response.json()
+    #     data = {
+    #         "account": {
+    #             "privateKey": wallet_details["account"]["privateKey"],
+    #             "address": wallet_details["account"]["address"]
+    #         },
+    #         "phase": wallet_details["phase"],
+    #         "network": "solana"
+    #     }
+    #     return data
     else:
         return {"msg": "something worng"}
 
 def number_of_network_detalis(argument, address, db: Session = Depends(get_db)): 
     if argument =="trx":
         data =[]
-        ael = {
-            "tokenId": "TM4q3gujYR7JUaFrZpM8x1P7NbQd6hwJts",
-            "tokenType": "trc20",
-            "tokenDecimal": 8,
-            "tokenAbbr": "AEL",
-            "tokenName": "AELINCE",
-            "tokenLogo": "https://bal-coin.vercel.app/assets/logo/ael_coin.png",
-            "rate": "2.000",
-            "balance": 0
-        }
-        data.insert(0,ael)
         trx = {
             "tokenId": "_",
             "tokenAbbr": "TRX",
@@ -1533,7 +1530,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
             "rate": 1,
             "balance": 0
         }
-        data.insert(1,trx)
+        data.insert(0,trx)
         usdt = {
             "tokenId": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
             "tokenType": "trc20",
@@ -1544,7 +1541,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
             "rate": 1,
             "balance": 0
         }
-        data.insert(2,usdt)
+        data.insert(1,usdt)
         user = db.query(DbUser).filter(DbUser.user_address == address).first()
         if user.user_token_id:           # type: ignore
             for tkr in user.user_token_id.split(","):                   # type: ignore
@@ -1630,133 +1627,133 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
             "token": tpk
         }
         return final_data
-    elif argument == "eth":
-        data =[]
-        eth = {
-            "tokenId": "_",
-            "tokenType": "erc20",
-            "tokenDecimal": 18,
-            "tokenAbbr": "ETH",
-            "tokenName": "ethereum",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/eth@2x.png",
-            "rate": "2.000",
-            "balance": 0
-        }
-        data.insert(0,eth)
-        bnb = {
-            "tokenId": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-            "tokenAbbr": "BNB",
-            "tokenType": "erc20",
-            "tokenDecimal": 18,
-            "tokenName": "Binance",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/bnb@2x.png",
-            "balance": 0
-        }
-        data.insert(1,bnb)
-        usdt = {
-            "tokenId": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "tokenType": "erc20",
-            "tokenDecimal": 6,
-            "tokenAbbr": "USDT",
-            "tokenName": "Tether USD",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/usdt@2x.png",
-            "balance": 0
-        }
-        data.insert(2,usdt)
-        user = db.query(DbUser).filter(DbUser.user_address == address).first()
-        if user.user_token_id:           # type: ignore
-            for tkr in user.user_token_id.split(","):                   # type: ignore
-                token = db.query(DbToken).filter(DbToken.token_id == int(tkr)).first()
-                token_details = {
-                    "tokenId": token.token_contect_id,           # type: ignore
-                    "balance":0,
-                    "tokenType": token.token_type,              # type: ignore
-                    "tokenDecimal": token.token_decimal,         # type: ignore
-                    "tokenAbbr": token.token_short_name,                # type: ignore
-                    "tokenName": token.token_name,            # type: ignore
-                    "tokenLogo": token.token_logo,          # type: ignore
-                }
-                data.append(token_details)
-        url= "http://13.235.171.121:2352/api/v1/eth/wallet/details"
-        body = {"address": address}           # type: ignore
-        headers = {'Content-type': 'application/json'}
-        response = requests.post(url,json=body,headers=headers)
-        wallet_details = response.json()
-        token= {
-                "tokenId": "_",
-                "balance": float(wallet_details["result"]) / 10**18,
-                "tokenName": "ethereum",
-                "tokenAbbr": "ETH",
-                "tokenDecimal": 18,
-                "tokenType": "erc20",
-                "tokenLogo": "https://assets.coincap.io/assets/icons/eth@2x.png"
-            },
-        result = []
-        for item in data:
-            found = False
-            for element in token:
-                if item.get("tokenAbbr") == element.get("tokenAbbr"):                    
-                    found = True
-                    break
-            if not found:
-                result.append(item)
-        result.extend(token)
-        tpk =[]
-        for trk in result:
-            trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
-            if trkl:
-                apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
-                url_price= "https://api.coincap.io/v2/assets/"+trkl.asset_name+"?Authorization="+apikey
-                res = requests.get(url_price)
-                price_details = res.json()
-                val_1 = {
-                        "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
-                        "balance": trk["balance"],                                             #  "301"
-                        "tokenName": trk["tokenName"],                                         #  "Tether USD"
-                        "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
-                        "tokenDecimal": trk["tokenDecimal"],                                   #   6
-                        "tokenType": trk["tokenType"],                                         #  "trc20"
-                        "tokenLogo": trk["tokenLogo"],
-                        "rate": "%.5f" %float(price_details['data']["priceUsd"])
-                }
-                tpk.append(val_1)
-            else:
-                val_1 = {
-                        "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
-                        "balance": trk["balance"],                                             #  "301"
-                        "tokenName": trk["tokenName"],                                         #  "Tether USD"
-                        "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
-                        "tokenDecimal": trk["tokenDecimal"],                                   #  6
-                        "tokenType": trk["tokenType"],                                         #  "trc20"
-                        "tokenLogo": trk["tokenLogo"],
-                        "rate": 1
-                }
-                tpk.append(val_1)
-        apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
-        url_price= "https://api.coincap.io/v2/assets/ethereum/?Authorization="+apikey
-        res = requests.get(url_price)
-        price_details = res.json()
-        final_data = {
-            "address": address,
-            "network": "ether",
-            "balance": str(float(wallet_details["result"]) / 10**18),
-            "rate": "%.5f" %float(price_details['data']["priceUsd"]),
-            "token":tpk
-        }
-        return final_data
+    # elif argument == "eth":
+        # data =[]
+        # eth = {
+        #     "tokenId": "_",
+        #     "tokenType": "erc20",
+        #     "tokenDecimal": 18,
+        #     "tokenAbbr": "ETH",
+        #     "tokenName": "ethereum",
+        #     "tokenLogo": "https://assets.coincap.io/assets/icons/eth@2x.png",
+        #     "rate": "2.000",
+        #     "balance": 0
+        # }
+        # data.insert(0,eth)
+        # bnb = {
+        #     "tokenId": "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
+        #     "tokenAbbr": "BNB",
+        #     "tokenType": "erc20",
+        #     "tokenDecimal": 18,
+        #     "tokenName": "Binance",
+        #     "tokenLogo": "https://assets.coincap.io/assets/icons/bnb@2x.png",
+        #     "balance": 0
+        # }
+        # data.insert(1,bnb)
+        # usdt = {
+        #     "tokenId": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        #     "tokenType": "erc20",
+        #     "tokenDecimal": 6,
+        #     "tokenAbbr": "USDT",
+        #     "tokenName": "Tether USD",
+        #     "tokenLogo": "https://assets.coincap.io/assets/icons/usdt@2x.png",
+        #     "balance": 0
+        # }
+        # data.insert(2,usdt)
+        # user = db.query(DbUser).filter(DbUser.user_address == address).first()
+        # if user.user_token_id:           # type: ignore
+        #     for tkr in user.user_token_id.split(","):                   # type: ignore
+        #         token = db.query(DbToken).filter(DbToken.token_id == int(tkr)).first()
+        #         token_details = {
+        #             "tokenId": token.token_contect_id,           # type: ignore
+        #             "balance":0,
+        #             "tokenType": token.token_type,              # type: ignore
+        #             "tokenDecimal": token.token_decimal,         # type: ignore
+        #             "tokenAbbr": token.token_short_name,                # type: ignore
+        #             "tokenName": token.token_name,            # type: ignore
+        #             "tokenLogo": token.token_logo,          # type: ignore
+        #         }
+        #         data.append(token_details)
+        # url= "http://13.235.171.121:2352/api/v1/eth/wallet/details"
+        # body = {"address": address}           # type: ignore
+        # headers = {'Content-type': 'application/json'}
+        # response = requests.post(url,json=body,headers=headers)
+        # wallet_details = response.json()
+        # token= {
+        #         "tokenId": "_",
+        #         "balance": float(wallet_details["result"]) / 10**18,
+        #         "tokenName": "ethereum",
+        #         "tokenAbbr": "ETH",
+        #         "tokenDecimal": 18,
+        #         "tokenType": "erc20",
+        #         "tokenLogo": "https://assets.coincap.io/assets/icons/eth@2x.png"
+        #     },
+        # result = []
+        # for item in data:
+        #     found = False
+        #     for element in token:
+        #         if item.get("tokenAbbr") == element.get("tokenAbbr"):                    
+        #             found = True
+        #             break
+        #     if not found:
+        #         result.append(item)
+        # result.extend(token)
+        # tpk =[]
+        # for trk in result:
+        #     trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
+        #     if trkl:
+        #         apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
+        #         url_price= "https://api.coincap.io/v2/assets/"+trkl.asset_name+"?Authorization="+apikey
+        #         res = requests.get(url_price)
+        #         price_details = res.json()
+        #         val_1 = {
+        #                 "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+        #                 "balance": trk["balance"],                                             #  "301"
+        #                 "tokenName": trk["tokenName"],                                         #  "Tether USD"
+        #                 "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
+        #                 "tokenDecimal": trk["tokenDecimal"],                                   #   6
+        #                 "tokenType": trk["tokenType"],                                         #  "trc20"
+        #                 "tokenLogo": trk["tokenLogo"],
+        #                 "rate": "%.5f" %float(price_details['data']["priceUsd"])
+        #         }
+        #         tpk.append(val_1)
+        #     else:
+        #         val_1 = {
+        #                 "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+        #                 "balance": trk["balance"],                                             #  "301"
+        #                 "tokenName": trk["tokenName"],                                         #  "Tether USD"
+        #                 "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
+        #                 "tokenDecimal": trk["tokenDecimal"],                                   #  6
+        #                 "tokenType": trk["tokenType"],                                         #  "trc20"
+        #                 "tokenLogo": trk["tokenLogo"],
+        #                 "rate": 1
+        #         }
+        #         tpk.append(val_1)
+        # apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
+        # url_price= "https://api.coincap.io/v2/assets/ethereum/?Authorization="+apikey
+        # res = requests.get(url_price)
+        # price_details = res.json()
+        # final_data = {
+        #     "address": address,
+        #     "network": "ether",
+        #     "balance": str(float(wallet_details["result"]) / 10**18),
+        #     "rate": "%.5f" %float(price_details['data']["priceUsd"]),
+        #     "token":tpk
+        # }
+        # return final_data
     elif argument == "bnb":
         data =[]
-        eth = {
-            "tokenId": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+        mhf = {
+            "tokenId": "0xd72ad2f5a057A21aA4cA8F7A586eB121e382c14C",
             "tokenType": "bep20",
-            "tokenDecimal": 18,
-            "tokenAbbr": "ETH",
-            "tokenName": "ethereum",
+            "tokenDecimal": 8,
+            "tokenAbbr": "MHF",
+            "tokenName": "mhf Coin",
             "tokenLogo": "https://assets.coincap.io/assets/icons/eth@2x.png",
-            "rate": "2.000",
+            "rate": "1.000",
             "balance": 0
         }
-        data.insert(0,eth)
+        data.insert(0,mhf)
         bnb = {
             "tokenId": "_",
             "tokenAbbr": "BNB",
@@ -1858,214 +1855,214 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
             "token":tpk
         }
         return final_data
-    elif argument == "polygon":
-        data =[]
-        eth = {
-            "tokenId": "_",
-            "tokenType": "erc20",
-            "tokenDecimal": 18,
-            "tokenAbbr": "MATIC",
-            "tokenName": "Polygon",
-            "tokenLogo": "https://etherscan.io/token/images/polygonnew_32.png",
-            "rate": "2.000",
-            "balance": 0
-        }
-        data.insert(0,eth)
-        bnb = {
-            "tokenId": "0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3",
-            "tokenAbbr": "BNB",
-            "tokenType": "erc20",
-            "tokenDecimal": 18,
-            "tokenName": "Binance",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/bnb@2x.png",
-            "balance": 0
-        }
-        data.insert(1,bnb)
-        usdt = {
-            "tokenId": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-            "tokenType": "erc20",
-            "tokenDecimal": 6,
-            "tokenAbbr": "USDT",
-            "tokenName": "Tether USD",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/usdt@2x.png",
-            "balance": 0
-        }
-        data.insert(2,usdt)
-        user = db.query(DbUser).filter(DbUser.user_address == address).first()
-        if user.user_token_id:           # type: ignore
-            for tkr in user.user_token_id.split(","):                   # type: ignore
-                token = db.query(DbToken).filter(DbToken.token_id == int(tkr)).first()
-                token_details = {
-                    "tokenId": token.token_contect_id,           # type: ignore
-                    "balance":0,
-                    "tokenType": token.token_type,              # type: ignore
-                    "tokenDecimal": token.token_decimal,         # type: ignore
-                    "tokenAbbr": token.token_short_name,                # type: ignore
-                    "tokenName": token.token_name,            # type: ignore
-                    "tokenLogo": token.token_logo,          # type: ignore
-                }
-                data.append(token_details)
-        url= "http://13.235.171.121:2352/api/v1/polygon/wallet/details"
-        body = {"address": address}           # type: ignore
-        headers = {'Content-type': 'application/json'}
-        response = requests.post(url,json=body,headers=headers)
-        wallet_details = response.json()
-        token= {
-                "tokenId": "_",
-                "balance": float(wallet_details["result"]) / 10**18,
-                "tokenName": "polygon",
-                "tokenAbbr": "MATIC",
-                "tokenDecimal": 18,
-                "tokenType": "erc20",
-                "tokenLogo": "https://etherscan.io/token/images/polygonnew_32.png"
-            },
-        result = []
-        for item in data:
-            found = False
-            for element in token:
-                if item.get("tokenAbbr") == element.get("tokenAbbr"):                    
-                    found = True
-                    break
-            if not found:
-                result.append(item)
-        result.extend(token)
-        tpk =[]
-        for trk in result:
-            trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
-            if trkl:
-                apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
-                url_price= "https://api.coincap.io/v2/assets/"+trkl.asset_name+"?Authorization="+apikey
-                res = requests.get(url_price)
-                price_details = res.json()
-                val_1 = {
-                        "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
-                        "balance": trk["balance"],             #  "301"
-                        "tokenName": trk["tokenName"],                                         #  "Tether USD"
-                        "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
-                        "tokenDecimal": trk["tokenDecimal"],                                   #  6
-                        "tokenType": trk["tokenType"],                                         #  "trc20"
-                        "tokenLogo": trk["tokenLogo"],
-                        "rate": "%.5f" %float(price_details['data']["priceUsd"])
-                }
-                tpk.append(val_1)
-            else:
-                val_1 = {
-                        "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
-                        "balance": trk["balance"],             #  "301"
-                        "tokenName": trk["tokenName"],                                         #  "Tether USD"
-                        "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
-                        "tokenDecimal": trk["tokenDecimal"],                                   #  6
-                        "tokenType": trk["tokenType"],                                         #  "trc20"
-                        "tokenLogo": trk["tokenLogo"],
-                        "rate": 1
-                }
-                tpk.append(val_1)
-        apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
-        url_price= "https://api.coincap.io/v2/assets/polygon/?Authorization="+apikey
-        res = requests.get(url_price)
-        price_details = res.json()
-        final_data = {
-            "address": address,
-            "network": "polygon",
-            "balance": str(float(wallet_details["result"]) / 10**18),
-            "rate": "%.5f" %float(price_details['data']["priceUsd"]),
-            "token":tpk
-        }
-        return final_data
-    elif argument == "solana":
-        data =[]
-        eth = {
-            "tokenId": "_",
-            "tokenType": "sol",
-            "tokenDecimal": 9,
-            "tokenAbbr": "SOL",
-            "tokenName": "solana",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/sol@2x.png",
-            "rate": "2.000",
-            "balance": 1000
-        }
-        data.insert(0,eth)
-        user = db.query(DbUser).filter(DbUser.user_address == address).first()
-        if user.user_token_id:           # type: ignore
-            for tkr in user.user_token_id.split(","):                   # type: ignore
-                token = db.query(DbToken).filter(DbToken.token_id == int(tkr)).first()
-                token_details = {
-                    "tokenId": token.token_contect_id,           # type: ignore
-                    "balance":0,
-                    "tokenType": token.token_type,              # type: ignore
-                    "tokenDecimal": token.token_decimal,         # type: ignore
-                    "tokenAbbr": token.token_short_name,                # type: ignore
-                    "tokenName": token.token_name,            # type: ignore
-                    "tokenLogo": token.token_logo,          # type: ignore
-                }
-                data.append(token_details)
-        url= "http://13.235.171.121:2352/api/v1/solana/wallet/details"
-        body = {"address": address}           # type: ignore
-        headers = {'Content-type': 'application/json'}
-        response = requests.post(url,json=body,headers=headers)
-        wallet_details = response.json()
-        token= {
-                "tokenId": "_",
-                "balance": float(wallet_details["balance"]) / 10**9,
-                "tokenName": "solana",
-                "tokenAbbr": "SOL",
-                "tokenDecimal": 9,
-                "tokenType": "sol",
-                "tokenLogo": "https://assets.coincap.io/assets/icons/sol@2x.png"
-            },
-        result = []
-        for item in data:
-            found = False
-            for element in token:
-                if item.get("tokenAbbr") == element.get("tokenAbbr"):                    
-                    found = True
-                    break
-            if not found:
-                result.append(item)
-        result.extend(token)
-        tpk =[]
-        for trk in result:
-            trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
-            if trkl:
-                apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
-                url_price= "https://api.coincap.io/v2/assets/"+trkl.asset_name+"?Authorization="+apikey
-                res = requests.get(url_price)
-                price_details = res.json()
-                val_1 = {
-                        "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
-                        "balance": trk["balance"],             #  "301"
-                        "tokenName": trk["tokenName"],                                         #  "Tether USD"
-                        "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
-                        "tokenDecimal": trk["tokenDecimal"],                                   #  6
-                        "tokenType": trk["tokenType"],                                         #  "trc20"
-                        "tokenLogo": trk["tokenLogo"],
-                        "rate": "%.5f" %float(price_details['data']["priceUsd"])
-                }
-                tpk.append(val_1)
-            else:
-                val_1 = {
-                        "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
-                        "balance": trk["balance"],             #  "301"
-                        "tokenName": trk["tokenName"],                                         #  "Tether USD"
-                        "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
-                        "tokenDecimal": trk["tokenDecimal"],                                   #  6
-                        "tokenType": trk["tokenType"],                                         #  "trc20"
-                        "tokenLogo": trk["tokenLogo"],
-                        "rate": 1
-                }
-                tpk.append(val_1)
-        apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
-        url_price= "https://api.coincap.io/v2/assets/solana/?Authorization="+apikey
-        res = requests.get(url_price)
-        price_details = res.json()
-        final_data = {
-            "address": address,
-            "network": "polygon",
-            "balance": str(float(wallet_details["balance"]) / 10**9),
-            "rate": "%.5f" %float(price_details['data']["priceUsd"]),
-            "token":tpk
-        }
-        return final_data
+    # elif argument == "polygon":
+    #     data =[]
+    #     eth = {
+    #         "tokenId": "_",
+    #         "tokenType": "erc20",
+    #         "tokenDecimal": 18,
+    #         "tokenAbbr": "MATIC",
+    #         "tokenName": "Polygon",
+    #         "tokenLogo": "https://etherscan.io/token/images/polygonnew_32.png",
+    #         "rate": "2.000",
+    #         "balance": 0
+    #     }
+    #     data.insert(0,eth)
+    #     bnb = {
+    #         "tokenId": "0x3BA4c387f786bFEE076A58914F5Bd38d668B42c3",
+    #         "tokenAbbr": "BNB",
+    #         "tokenType": "erc20",
+    #         "tokenDecimal": 18,
+    #         "tokenName": "Binance",
+    #         "tokenLogo": "https://assets.coincap.io/assets/icons/bnb@2x.png",
+    #         "balance": 0
+    #     }
+    #     data.insert(1,bnb)
+    #     usdt = {
+    #         "tokenId": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+    #         "tokenType": "erc20",
+    #         "tokenDecimal": 6,
+    #         "tokenAbbr": "USDT",
+    #         "tokenName": "Tether USD",
+    #         "tokenLogo": "https://assets.coincap.io/assets/icons/usdt@2x.png",
+    #         "balance": 0
+    #     }
+    #     data.insert(2,usdt)
+    #     user = db.query(DbUser).filter(DbUser.user_address == address).first()
+    #     if user.user_token_id:           # type: ignore
+    #         for tkr in user.user_token_id.split(","):                   # type: ignore
+    #             token = db.query(DbToken).filter(DbToken.token_id == int(tkr)).first()
+    #             token_details = {
+    #                 "tokenId": token.token_contect_id,           # type: ignore
+    #                 "balance":0,
+    #                 "tokenType": token.token_type,              # type: ignore
+    #                 "tokenDecimal": token.token_decimal,         # type: ignore
+    #                 "tokenAbbr": token.token_short_name,                # type: ignore
+    #                 "tokenName": token.token_name,            # type: ignore
+    #                 "tokenLogo": token.token_logo,          # type: ignore
+    #             }
+    #             data.append(token_details)
+    #     url= "http://13.235.171.121:2352/api/v1/polygon/wallet/details"
+    #     body = {"address": address}           # type: ignore
+    #     headers = {'Content-type': 'application/json'}
+    #     response = requests.post(url,json=body,headers=headers)
+    #     wallet_details = response.json()
+    #     token= {
+    #             "tokenId": "_",
+    #             "balance": float(wallet_details["result"]) / 10**18,
+    #             "tokenName": "polygon",
+    #             "tokenAbbr": "MATIC",
+    #             "tokenDecimal": 18,
+    #             "tokenType": "erc20",
+    #             "tokenLogo": "https://etherscan.io/token/images/polygonnew_32.png"
+    #         },
+    #     result = []
+    #     for item in data:
+    #         found = False
+    #         for element in token:
+    #             if item.get("tokenAbbr") == element.get("tokenAbbr"):                    
+    #                 found = True
+    #                 break
+    #         if not found:
+    #             result.append(item)
+    #     result.extend(token)
+    #     tpk =[]
+    #     for trk in result:
+    #         trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
+    #         if trkl:
+    #             apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
+    #             url_price= "https://api.coincap.io/v2/assets/"+trkl.asset_name+"?Authorization="+apikey
+    #             res = requests.get(url_price)
+    #             price_details = res.json()
+    #             val_1 = {
+    #                     "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+    #                     "balance": trk["balance"],             #  "301"
+    #                     "tokenName": trk["tokenName"],                                         #  "Tether USD"
+    #                     "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
+    #                     "tokenDecimal": trk["tokenDecimal"],                                   #  6
+    #                     "tokenType": trk["tokenType"],                                         #  "trc20"
+    #                     "tokenLogo": trk["tokenLogo"],
+    #                     "rate": "%.5f" %float(price_details['data']["priceUsd"])
+    #             }
+    #             tpk.append(val_1)
+    #         else:
+    #             val_1 = {
+    #                     "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+    #                     "balance": trk["balance"],             #  "301"
+    #                     "tokenName": trk["tokenName"],                                         #  "Tether USD"
+    #                     "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
+    #                     "tokenDecimal": trk["tokenDecimal"],                                   #  6
+    #                     "tokenType": trk["tokenType"],                                         #  "trc20"
+    #                     "tokenLogo": trk["tokenLogo"],
+    #                     "rate": 1
+    #             }
+    #             tpk.append(val_1)
+    #     apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
+    #     url_price= "https://api.coincap.io/v2/assets/polygon/?Authorization="+apikey
+    #     res = requests.get(url_price)
+    #     price_details = res.json()
+    #     final_data = {
+    #         "address": address,
+    #         "network": "polygon",
+    #         "balance": str(float(wallet_details["result"]) / 10**18),
+    #         "rate": "%.5f" %float(price_details['data']["priceUsd"]),
+    #         "token":tpk
+    #     }
+    #     return final_data
+    # elif argument == "solana":
+        # data =[]
+        # eth = {
+        #     "tokenId": "_",
+        #     "tokenType": "sol",
+        #     "tokenDecimal": 9,
+        #     "tokenAbbr": "SOL",
+        #     "tokenName": "solana",
+        #     "tokenLogo": "https://assets.coincap.io/assets/icons/sol@2x.png",
+        #     "rate": "2.000",
+        #     "balance": 1000
+        # }
+        # data.insert(0,eth)
+        # user = db.query(DbUser).filter(DbUser.user_address == address).first()
+        # if user.user_token_id:           # type: ignore
+        #     for tkr in user.user_token_id.split(","):                   # type: ignore
+        #         token = db.query(DbToken).filter(DbToken.token_id == int(tkr)).first()
+        #         token_details = {
+        #             "tokenId": token.token_contect_id,           # type: ignore
+        #             "balance":0,
+        #             "tokenType": token.token_type,              # type: ignore
+        #             "tokenDecimal": token.token_decimal,         # type: ignore
+        #             "tokenAbbr": token.token_short_name,                # type: ignore
+        #             "tokenName": token.token_name,            # type: ignore
+        #             "tokenLogo": token.token_logo,          # type: ignore
+        #         }
+        #         data.append(token_details)
+        # url= "http://13.235.171.121:2352/api/v1/solana/wallet/details"
+        # body = {"address": address}           # type: ignore
+        # headers = {'Content-type': 'application/json'}
+        # response = requests.post(url,json=body,headers=headers)
+        # wallet_details = response.json()
+        # token= {
+        #         "tokenId": "_",
+        #         "balance": float(wallet_details["balance"]) / 10**9,
+        #         "tokenName": "solana",
+        #         "tokenAbbr": "SOL",
+        #         "tokenDecimal": 9,
+        #         "tokenType": "sol",
+        #         "tokenLogo": "https://assets.coincap.io/assets/icons/sol@2x.png"
+        #     },
+        # result = []
+        # for item in data:
+        #     found = False
+        #     for element in token:
+        #         if item.get("tokenAbbr") == element.get("tokenAbbr"):                    
+        #             found = True
+        #             break
+        #     if not found:
+        #         result.append(item)
+        # result.extend(token)
+        # tpk =[]
+        # for trk in result:
+        #     trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
+        #     if trkl:
+        #         apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
+        #         url_price= "https://api.coincap.io/v2/assets/"+trkl.asset_name+"?Authorization="+apikey
+        #         res = requests.get(url_price)
+        #         price_details = res.json()
+        #         val_1 = {
+        #                 "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+        #                 "balance": trk["balance"],             #  "301"
+        #                 "tokenName": trk["tokenName"],                                         #  "Tether USD"
+        #                 "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
+        #                 "tokenDecimal": trk["tokenDecimal"],                                   #  6
+        #                 "tokenType": trk["tokenType"],                                         #  "trc20"
+        #                 "tokenLogo": trk["tokenLogo"],
+        #                 "rate": "%.5f" %float(price_details['data']["priceUsd"])
+        #         }
+        #         tpk.append(val_1)
+        #     else:
+        #         val_1 = {
+        #                 "tokenId": trk["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
+        #                 "balance": trk["balance"],             #  "301"
+        #                 "tokenName": trk["tokenName"],                                         #  "Tether USD"
+        #                 "tokenAbbr": trk["tokenAbbr"].upper(),                                 #  "USDT"
+        #                 "tokenDecimal": trk["tokenDecimal"],                                   #  6
+        #                 "tokenType": trk["tokenType"],                                         #  "trc20"
+        #                 "tokenLogo": trk["tokenLogo"],
+        #                 "rate": 1
+        #         }
+        #         tpk.append(val_1)
+        # apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
+        # url_price= "https://api.coincap.io/v2/assets/solana/?Authorization="+apikey
+        # res = requests.get(url_price)
+        # price_details = res.json()
+        # final_data = {
+        #     "address": address,
+        #     "network": "polygon",
+        #     "balance": str(float(wallet_details["balance"]) / 10**9),
+        #     "rate": "%.5f" %float(price_details['data']["priceUsd"]),
+        #     "token":tpk
+        # }
+        # return final_data
     else:
         return {"msg": "something worng"}
 
@@ -2283,3 +2280,9 @@ def ismnemonickey(mkey):  # type: ignore
     response = requests.post(url,json=body,headers=headers)
     wallet_details = response.json()
     return wallet_details
+
+def generate_unique_number():
+    epoch_time = int(time.time())
+    unique_id = uuid.uuid1()
+    unique_number = str(epoch_time) + str(unique_id)[:8]
+    return unique_number[6:14].upper()

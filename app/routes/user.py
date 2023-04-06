@@ -14,8 +14,8 @@ from app.oprations.index import (backup_wallet_phase, backup_wallet_private,
                                  create_wallet, details_all_wallet,
                                  details_wallet, details_wallet_bal,
                                  import_eth_wallet, import_wallet,
-                                 network_wallet_bal, send_all, send_trx,
-                                 show_all_note_transaction,
+                                 network_wallet_bal, random_number, send_all,
+                                 send_trx, show_all_note_transaction,
                                  show_all_receive_transaction,
                                  show_all_send_transaction,
                                  show_all_transaction, show_note_transaction,
@@ -150,3 +150,7 @@ def transactionNoteReceive(address: str, network: str, db: Session = Depends(get
 @user.post('/all/wallet/balance', status_code=status.HTTP_200_OK)
 def allWalletBal(request: WalletDetailsAll, db: Session = Depends(get_db)):
     return network_wallet_bal(request, db)  # type: ignore
+
+@user.get('/random/{number}', status_code=status.HTTP_200_OK)
+def randomNumber(number: int, db: Session = Depends(get_db)):            # type: ignore 
+    return random_number(number, db) 
