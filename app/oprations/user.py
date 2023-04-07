@@ -1542,6 +1542,17 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
             "balance": 0
         }
         data.insert(1,usdt)
+        xrp = {
+            "tokenId": "TGcjqn3vtazhgCtt26L1QxuHw5fiEEdcFU",
+            "tokenType": "trc20",
+            "tokenDecimal": 6,
+            "tokenAbbr": "XRP",
+            "tokenName": "Ripple",
+            "tokenLogo": "https://static.tronscan.org/production/upload/logo/TGcjqn3vtazhgCtt26L1QxuHw5fiEEdcFU.png",
+            "rate": 1,
+            "balance": 0
+        }
+        data.insert(2,xrp)
         user = db.query(DbUser).filter(DbUser.user_address == address).first()
         if user.user_token_id:           # type: ignore
             for tkr in user.user_token_id.split(","):                   # type: ignore
@@ -1749,7 +1760,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
             "tokenDecimal": 8,
             "tokenAbbr": "MHF",
             "tokenName": "mhf Coin",
-            "tokenLogo": "https://assets.coincap.io/assets/icons/eth@2x.png",
+            "tokenLogo": "https://bal-coin.vercel.app/assets/icon/mhf-coin-icon.png",
             "rate": "1.000",
             "balance": 0
         }

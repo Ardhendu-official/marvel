@@ -4,17 +4,21 @@ import secrets
 import time
 import uuid
 from datetime import datetime, timedelta
+# from io import BytesIO
 from typing import List
 
 import pytz
 import requests
 from fastapi import APIRouter, Depends, HTTPException, status
+# from PIL import Image
 from sqlalchemy.orm.session import Session
-from web3 import Web3
 
 from app.config.database import SessionLocal, engine
 from app.models.index import DbToken, DbUser
 from app.schemas.index import Assets, AssetsAdd, AssetsNetwork
+
+# from web3 import Web3
+
 
 
 def get_db():
@@ -367,34 +371,40 @@ def number_of_network_token_add(argument, address, c_address):
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"token already added")
-    elif argument == "eth":
-        if not c_address == "0xdAC17F958D2ee523a2206206994597C13D831ec7" and not c_address == "0xB8c77482e45F1F44dE1745F52C74426C631bDD52":
-            w3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/86a9285ab42b47ddbec539e3bec12d0a'))
-            url = url = f'https://api.etherscan.io/api?module=contract&action=tokeninfo&address={c_address}&apikey=4H9HPQ1GPGHIAG3D58Y4RPPI4AE6NGA4U8'
-            response = requests.get(url)
-            result = response.json()
-            abi = json.loads(result["result"])
-            # if result["status"] == "1":
-            contract = w3.eth.contract(address=c_address, abi=abi)
-            # # print(contract)
-            name = contract.functions.name().call()
-            # symbol = contract.functions.symbol().call()
-            # decimals = contract.functions.name()
-            # logo_url = contract.functions.tokenURI(0).call()
-            # response = requests.get(logo_url)
-            # logo_image = response.content   
-            # resp = {
-            #     'token_name': name,
-            #     'token_short_name': symbol,
-            #     'token_contect_id': c_address,
-            #     'token_logo': logo_image,
-            #     'token_decimal': decimals,
-            #     'token_can_show': 1,
-            #     'token_network': "eth"
-            # }
-            return name
-            # else:
-            #     return []
+    elif argument == "bnb":
+        if not c_address == "0xd72ad2f5a057A21aA4cA8F7A586eB121e382c14C" and not c_address == "0x2B90E061a517dB2BbD7E39Ef7F733Fd234B494CA":
+        #  # Replace YOUR_API_KEY with your BSCScan API key
+        #     api_key = 'IWFZ9GJ1HMINPGD65Q2GZDDPTJNHJJFEUY'
+
+        #     # Replace CONTRACT_ADDRESS with the contract address you want to retrieve information for
+        #     contract_address = c_address
+
+        #     # Build the URL for the API request
+        #     # url = f'https://api.bscscan.com/api?module=contract&action=getabi&address={contract_address}&apikey={api_key}'
+        #     w3 = Web3(Web3.HTTPProvider('https://bsc-dataseed1.binance.org'))
+
+        #     # Retrieve the contract name, symbol and decimal from the contract instance
+        #     contract = w3.eth.contract(address=contract_address, abi=[])
+        #     contract_name = contract.functions.name().call()
+        #     contract_symbol = contract.functions.symbol().call()
+        #     contract_decimal = contract.functions.decimals().call()
+
+        #     # Build the URL for the contract image
+        #     image_url = f'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/{contract_address}/logo.png'
+
+        #     # Retrieve the contract image
+        #     response = requests.get(image_url)
+        #     image = Image.open(BytesIO(response.content))
+
+        #     # Print the contract details
+        #     print(f'Contract Name: {contract_name}')
+        #     print(f'Contract Symbol: {contract_symbol}')
+        #     print(f'Contract Decimals: {contract_decimal}')
+
+        #     # Show the contract image
+        #     image.show()
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                    detail=f"token already added")
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"token already added")
