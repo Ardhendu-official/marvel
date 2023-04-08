@@ -1851,7 +1851,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                         "tokenDecimal": trk["tokenDecimal"],                                   #  6
                         "tokenType": trk["tokenType"],                                         #  "trc20"
                         "tokenLogo": trk["tokenLogo"],
-                        "rate": 1
+                        "rate": "1"
                 }
                 tpk.append(val_1)
         apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
