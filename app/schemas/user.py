@@ -14,6 +14,7 @@ class UserNew(BaseModel):
     user_password: str
     user_hash_id: Optional[str] = None
     user_network: Optional[str] = None
+    get_referral_id: Optional[str] = None
 
 class ImportWallet(BaseModel):
     user_wallet_name: str
@@ -52,6 +53,12 @@ class sendAll(BaseModel):
     from_account: str
     to_account: str
     amount: float
+    user_hash_id: Optional[str] = None
+    password: Optional[str] = None
+    user_network: str
+
+class sendAirdrop(BaseModel):
+    to_account: str
     user_hash_id: Optional[str] = None
     password: Optional[str] = None
     user_network: str

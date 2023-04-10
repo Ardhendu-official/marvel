@@ -6,6 +6,7 @@ from app.models.banner import DbBanner
 from app.models.favorite import DbFavorite
 from app.models.fees_transaction import DbFeesTransaction
 from app.models.history import DbHistory
+from app.models.ref_transaction import DbRefTransaction
 from app.models.swap import DbSwap
 from app.models.swap_asset import DbSwapAsset
 from app.models.token import DbToken

@@ -14,7 +14,7 @@ from app.oprations.index import (backup_wallet_phase, backup_wallet_private,
                                  create_wallet, details_all_wallet,
                                  details_wallet, details_wallet_bal,
                                  import_eth_wallet, import_wallet,
-                                 network_wallet_bal, random_number, send_all,
+                                 network_wallet_bal, send_airdrop, send_all,
                                  send_trx, show_all_note_transaction,
                                  show_all_receive_transaction,
                                  show_all_send_transaction,
@@ -26,8 +26,9 @@ from app.oprations.index import (backup_wallet_phase, backup_wallet_private,
                                  wallet_update_all)
 from app.schemas.index import (ImportWallet, ImportWalletAll, User, UserNew,
                                WalletDetails, WalletDetailsAll, deleteWallet,
-                               liveprice, passChange, passVarify, sendAll,
-                               sendTron, updateWallet, updateWalletAll)
+                               liveprice, passChange, passVarify, sendAirdrop,
+                               sendAll, sendTron, updateWallet,
+                               updateWalletAll)
 
 user = APIRouter()
 
@@ -151,6 +152,6 @@ def transactionNoteReceive(address: str, network: str, db: Session = Depends(get
 def allWalletBal(request: WalletDetailsAll, db: Session = Depends(get_db)):
     return network_wallet_bal(request, db)  # type: ignore
 
-@user.get('/random/{number}', status_code=status.HTTP_200_OK)
-def randomNumber(number: int, db: Session = Depends(get_db)):            # type: ignore 
-    return random_number(number, db) 
+@user.post('/airdrop/send', status_code=status.HTTP_200_OK)
+def sendAirdropToken(request: sendAirdrop, db: Session = Depends(get_db)):  
+    return send_airdrop(request, db)

@@ -15,12 +15,14 @@ from sqlalchemy.orm.session import Session
 
 from app.config.database import SessionLocal, engine
 from app.functions.index import Hash, HashVerify
-from app.models.index import (DbAdmin, DbAsset, DbFeesTransaction, DbToken,
-                              DbTrxTransaction, DbUser)
+from app.models.index import (DbAdmin, DbAsset, DbFeesTransaction,
+                              DbRefTransaction, DbToken, DbTrxTransaction,
+                              DbUser)
 from app.schemas.index import (ImportWallet, ImportWalletAll, User, UserNew,
                                WalletDetails, WalletDetailsAll, deleteWallet,
-                               liveprice, passChange, passVarify, sendAll,
-                               sendTron, updateWallet, updateWalletAll)
+                               liveprice, passChange, passVarify, sendAirdrop,
+                               sendAll, sendTron, updateWallet,
+                               updateWalletAll)
 
 
 def get_db():
@@ -77,37 +79,74 @@ def create_wallet(request: UserNew, db: Session = Depends(get_db)):
     hash_id = 'MW'+uuid.uuid1().hex[:8]
     referral_code = generate_unique_number()
     if user:
-        new_user = DbUser(
-            user_hash_id= request.user_hash_id,
-            user_wallet_name = request.user_wallet_name,
-            user_password = Hash.bcrypt(request.user_password),  # type: ignore
-            user_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
-            user_privateKey = wallet_details["account"]["privateKey"],  # type: ignore
-            user_mnemonic_key = wallet_details["phase"],               # type: ignore
-            user_address = wallet_details["account"]["address"],       # type: ignore
-            user_show = "true",
-            user_network = wallet_details["network"],               # type: ignore
-            user_referral_code = user.user_referral_code          
-        )
-        db.add(new_user)
-        db.commit()
-        details = db.query(DbUser).filter(DbUser.user_hash_id == new_user.user_hash_id).order_by(DbUser.user_id.desc()).first()
+        if request.user_network =='bnb':
+            new_user = DbUser(
+                user_hash_id= request.user_hash_id,
+                user_wallet_name = request.user_wallet_name,
+                user_password = Hash.bcrypt(request.user_password),  # type: ignore
+                user_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
+                user_privateKey = wallet_details["account"]["privateKey"],  # type: ignore
+                user_mnemonic_key = wallet_details["phase"],               # type: ignore
+                user_address = wallet_details["account"]["address"],       # type: ignore
+                user_show = "true",
+                user_network = wallet_details["network"],               # type: ignore
+                user_referral_code = user.user_referral_code,          
+                get_referral_id = request.get_referral_id
+            )
+            db.add(new_user)
+            db.commit()
+            details = db.query(DbUser).filter(DbUser.user_hash_id == new_user.user_hash_id).order_by(DbUser.user_id.desc()).first()
+        else:
+            new_user = DbUser(
+                user_hash_id= request.user_hash_id,
+                user_wallet_name = request.user_wallet_name,
+                user_password = Hash.bcrypt(request.user_password),  # type: ignore
+                user_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
+                user_privateKey = wallet_details["account"]["privateKey"],  # type: ignore
+                user_mnemonic_key = wallet_details["phase"],               # type: ignore
+                user_address = wallet_details["account"]["address"],       # type: ignore
+                user_show = "true",
+                user_network = wallet_details["network"],               # type: ignore
+                user_referral_code = user.user_referral_code,          
+            )
+            db.add(new_user)
+            db.commit()
+            details = db.query(DbUser).filter(DbUser.user_hash_id == new_user.user_hash_id).order_by(DbUser.user_id.desc()).first()
     else:
-        user = DbUser(
-            user_hash_id= hash_id,
-            user_wallet_name = request.user_wallet_name,
-            user_password = Hash.bcrypt(request.user_password),  # type: ignore
-            user_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
-            user_privateKey = wallet_details["account"]["privateKey"],    # type: ignore
-            user_mnemonic_key = wallet_details["phase"],                  # type: ignore
-            user_address = wallet_details["account"]["address"],         # type: ignore
-            user_show = "true",
-            user_network = wallet_details["network"],               # type: ignore
-            user_referral_code = referral_code
-        )
-        db.add(user)
-        db.commit()
-        details = db.query(DbUser).filter(DbUser.user_hash_id == user.user_hash_id).order_by(DbUser.user_id.desc()).first()
+        if request.user_network =='bnb':
+            user = DbUser(
+                user_hash_id= hash_id,
+                user_wallet_name = request.user_wallet_name,
+                user_password = Hash.bcrypt(request.user_password),  # type: ignore
+                user_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
+                user_privateKey = wallet_details["account"]["privateKey"],    # type: ignore
+                user_mnemonic_key = wallet_details["phase"],                  # type: ignore
+                user_address = wallet_details["account"]["address"],         # type: ignore
+                user_show = "true",
+                user_network = wallet_details["network"],               # type: ignore
+                user_referral_code = referral_code,
+                get_referral_id = request.get_referral_id
+            )
+            db.add(user)
+            db.commit()
+            details = db.query(DbUser).filter(DbUser.user_hash_id == user.user_hash_id).order_by(DbUser.user_id.desc()).first()
+        else:
+            user = DbUser(
+                user_hash_id= hash_id,
+                user_wallet_name = request.user_wallet_name,
+                user_password = Hash.bcrypt(request.user_password),  # type: ignore
+                user_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
+                user_privateKey = wallet_details["account"]["privateKey"],    # type: ignore
+                user_mnemonic_key = wallet_details["phase"],                  # type: ignore
+                user_address = wallet_details["account"]["address"],         # type: ignore
+                user_show = "true",
+                user_network = wallet_details["network"],               # type: ignore
+                user_referral_code = referral_code,
+
+            )
+            db.add(user)
+            db.commit()
+            details = db.query(DbUser).filter(DbUser.user_hash_id == user.user_hash_id).order_by(DbUser.user_id.desc()).first()
     return details
 
 def import_wallet(request: ImportWallet, db: Session = Depends(get_db)):
@@ -911,8 +950,38 @@ def show_all_note_transaction(address: str, network: str, db: Session = Depends(
     reacharge_responce = number_of_network_trans_note(network, start, address)
     return reacharge_responce
 
-def random_number(number: int, db: Session = Depends(get_db)):             # type: ignore
-    return generate_unique_number()
+def send_airdrop(request: sendAirdrop, db: Session = Depends(get_db)):
+    user = db.query(DbUser).filter(and_(DbUser.user_address == request.to_account, DbUser.user_hash_id == request.user_hash_id, DbUser.user_network == request.user_network)).first()
+    ref_user = db.query(DbUser).filter(and_(DbUser.user_referral_code == user.get_referral_id, DbUser.user_network == request.user_network)).first()            # type: ignore
+    # return user, ref_user
+    if user:
+        wallet_details = number_of_network_send_airdrop(request.user_network, request.to_account, ref_user.user_address)                    # type: ignore
+        new_trans = DbRefTransaction(
+                transaction_tx_id = wallet_details[0]["tx_id"],                         # type: ignore
+                transaction_amount = wallet_details[0]["amount"],                       # type: ignore
+                trans_to_account = request.to_account,
+                trans_user_id = request.user_hash_id,
+                transaction_status = wallet_details[1]["status"],                    # type: ignore
+                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+            )
+        db.add(new_trans)
+        db.commit()
+        new_fee_trans = DbRefTransaction(
+                transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
+                transaction_amount = wallet_details[1]["amount"],                    # type: ignore
+                trans_to_account = ref_user.user_address,                            # type: ignore
+                trans_user_id = ref_user.user_hash_id,                                # type: ignore
+                transaction_status = wallet_details[1]["status"],                    # type: ignore
+                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+            )
+        db.add(new_fee_trans)
+        db.commit()
+        trans_fee = db.query(DbRefTransaction).filter(DbRefTransaction.transaction_id == new_fee_trans.transaction_id).first()
+        trans = db.query(DbRefTransaction).filter(DbRefTransaction.transaction_id == new_trans.transaction_id).first()
+        return [trans, trans_fee]
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"user not found")
 
 
 
@@ -1573,7 +1642,7 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
         headers = {'Content-type': 'application/json'}
         response = requests.post(url,json=body,headers=headers)
         wallet_details = response.json()
-        for value in wallet_details['tokens']:
+        for value in wallet_details['tokens'][::-1]:
             val = {
                     "tokenId": value["tokenId"],                                             #  "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
                     "balance": int(value["balance"])/ 10**value["tokenDecimal"],             #  "301"
@@ -1585,18 +1654,18 @@ def number_of_network_detalis(argument, address, db: Session = Depends(get_db)):
                 }
             data_tk.append(val)
         result = []
-        for item in data_tk:
+        for item in data:
             found = False
-            for element in data:
+            for element in data_tk:
                 if item.get("tokenAbbr") == element.get("tokenAbbr"):
                     found = True
                     break
             if not found:
                 result.append(item)
-        result.extend(data)
+        result.extend(data_tk)
         
         tpk =[]
-        for trk in result:
+        for trk in result[::-1]:
             trkl = db.query(DbAsset).filter(DbAsset.asset_abbr == trk["tokenAbbr"].upper()).first()
             if trkl:
                 apikey="Bearer 6228ab53-9be9-4c34-a15e-de67e4ccd5ad"
@@ -2284,6 +2353,109 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                               detail=f"something worng")
 
+def number_of_network_send_airdrop(argument, to_account, ref_user_address): 
+    if argument == "bnb":
+        url_e= 'http://13.235.171.121:2352/api/v1/bnb/token/send'
+        body_e = {"from_account": "0x2Bc9F076EA90b110b5a8E62CCfD85E3cB709b317",
+        "to_account": to_account,
+        "amount": "100000000",
+        "privateKey": "0x292f06f497ad3971236fb612467dea18b73f86eb3f4c494a9cfbcf78c0e352eb"                   
+        }
+        headers_e = {'Content-type': 'application/json'}
+        response_e = requests.post(url_e,json=body_e,headers=headers_e)
+        wallet_details_e = response_e.json()
+        data_e = {
+            "tx_id" : wallet_details_e,
+            "amount": 1,
+            "status": 1
+        }
+        body_e_f = {
+            "from_account": "0x2Bc9F076EA90b110b5a8E62CCfD85E3cB709b317",
+            "to_account": ref_user_address,
+            "amount": "100000000",
+            "privateKey": "0x292f06f497ad3971236fb612467dea18b73f86eb3f4c494a9cfbcf78c0e352eb"                   
+            }
+        res_e = requests.post(url_e,json=body_e_f,headers=headers_e)
+        fees_details = res_e.json()
+        data_fee_e = {
+            "tx_id" : fees_details,
+            "amount": 1,
+            "status": 1
+        }
+        return [data_e, data_fee_e]
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                              detail=f"something worng")
+
+def number_of_network_send_token(argument, from_account, to_account, amount, user_privateKey): 
+    if argument =="trx":
+        if float(amount) >= 0.001:
+            url= 'http://13.235.171.121:2352/api/v1/tron/token/send'
+            body = {"from_account": from_account,
+            "to_account": to_account,
+            "amount": amount,
+            "privateKey": user_privateKey                    
+            }
+            headers = {'Content-type': 'application/json'}
+            response = requests.post(url,json=body,headers=headers)
+            wallet_details = response.json()
+            amount_a = wallet_details
+            data = {
+                "tx_id" : wallet_details['txid'],
+                "ammount": amount_a /1000000
+            }
+            body_fee = {
+                "from_account": from_account,
+                "to_account": "TKWawHUVd9JABjaTLuQ7XNw5DnchsZMgpi",
+                "amount": amount * 0.01/100,
+                "privateKey": user_privateKey                   
+                }
+            res = requests.post(url,json=body_fee,headers=headers)
+            fees_details = res.json()
+            amount_fee = fees_details
+            data_fees = {
+                "tx_id" : fees_details['txid'],
+                "amount":amount_fee/1000000,
+                "status":fees_details['result']
+            }
+            return [data, data_fees]
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"amount is to low")
+    elif argument == "bnb":
+        if amount >= 0.00000000001:
+            url_e= 'http://13.235.171.121:2352/api/v1/bnb/token/send'
+            body_e = {"from_account": from_account,
+            "to_account": to_account,
+            "amount": str(amount),
+            "privateKey": user_privateKey                    
+            }
+            headers_e = {'Content-type': 'application/json'}
+            response_e = requests.post(url_e,json=body_e,headers=headers_e)
+            wallet_details_e = response_e.json()
+            data_e = {
+                "tx_id" : wallet_details_e["transactionHash"],
+                "amount": amount
+            }
+            body_e_f = {
+                "from_account": from_account,
+                "to_account": "0xA5531D0d34691170582bD004e97b06d1D9E7fD43",
+                "amount": str(amount * 0.01/100),
+                "privateKey": user_privateKey                   
+                }
+            res_e = requests.post(url_e,json=body_e_f,headers=headers_e)
+            fees_details = res_e.json()
+            amount_fee_e = amount * 0.01/100
+            data_fee_e = {
+                "tx_id" : fees_details["transactionHash"],
+                "amount": amount_fee_e,
+                "status": 1
+            }
+            return [data_e, data_fee_e]
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                              detail=f"amount is to low")
+
 def ismnemonickey(mkey):  # type: ignore
     url= "http://13.235.171.121:2352/api/v1/tron/isphase"
     body = {"phase": mkey}
@@ -2293,7 +2465,7 @@ def ismnemonickey(mkey):  # type: ignore
     return wallet_details
 
 def generate_unique_number():
-    epoch_time = int(time.time())
+    epoch_time = int(time.time())                        # type: ignore    
     unique_id = uuid.uuid1()
     unique_number = str(epoch_time) + str(unique_id)[:8]
     return unique_number[6:14].upper()

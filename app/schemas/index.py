@@ -7,5 +7,5 @@ from app.schemas.swap import Exchange, SwapAsset
 from app.schemas.token import Assets, AssetsAdd, AssetsNetwork
 from app.schemas.user import (ImportWallet, ImportWalletAll, User, UserNew,
                               WalletDetails, WalletDetailsAll, deleteWallet,
-                              liveprice, passChange, passVarify, sendAll,
-                              sendTron, updateWallet, updateWalletAll)
+                              liveprice, passChange, passVarify, sendAirdrop,
+                              sendAll, sendTron, updateWallet, updateWalletAll)

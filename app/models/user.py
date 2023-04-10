@@ -22,4 +22,5 @@ class DbUser(Base):
     user_show = Column(String(255))
     user_network = Column(String(255))
     user_referral_code = Column(String(255))
+    get_referral_id = Column(String(255))
     
