@@ -982,34 +982,34 @@ def send_token_all(request: sendTokenAll, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(and_(DbUser.user_address == request.from_account, DbUser.user_hash_id == request.user_hash_id, DbUser.user_network == request.user_network)).first()
     if user:
         wallet_details = number_of_network_send_token(request.user_network, request.from_account, request.to_account, request.amount, user.user_privateKey, request.c_account)
-        return wallet_details
-        # new_trans = DbTrxTransaction(
-        #         transaction_tx_id = wallet_details[0]["tx_id"],                         # type: ignore
-        #         transaction_amount = wallet_details[0]["amount"],                       # type: ignore 
-        #         trans_from_account = request.from_account,
-        #         trans_to_account = request.to_account,
-        #         trans_user_id = request.user_hash_id,
-        #         transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
-        #     )
-        # db.add(new_trans)
-        # db.commit()
-        # new_fee_trans = DbFeesTransaction(
-        #         transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
-        #         transaction_amount = wallet_details[1]["amount"],                    # type: ignore
-        #         trans_from_account = request.from_account,
-        #         trans_user_id = request.user_hash_id,
-        #         transaction_status = wallet_details[1]["status"],                    # type: ignore
-        #         transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
-        #     )
-        # db.add(new_fee_trans)
-        # db.commit()
-        # amo = db.query(DbAdmin).first()
-        # amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
-        # db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
-        # db.commit()
-        # trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
-        # trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
-        # return [trans, trans_fee]
+        # return wallet_details
+        new_trans = DbTrxTransaction(
+                transaction_tx_id = wallet_details[0]["tx_id"],                         # type: ignore
+                transaction_amount = wallet_details[0]["amount"],                       # type: ignore 
+                trans_from_account = request.from_account,
+                trans_to_account = request.to_account,
+                trans_user_id = request.user_hash_id,
+                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+            )
+        db.add(new_trans)
+        db.commit()
+        new_fee_trans = DbFeesTransaction(
+                transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
+                transaction_amount = wallet_details[1]["amount"],                    # type: ignore
+                trans_from_account = request.from_account,
+                trans_user_id = request.user_hash_id,
+                transaction_status = wallet_details[1]["status"],                    # type: ignore
+                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+            )
+        db.add(new_fee_trans)
+        db.commit()
+        amo = db.query(DbAdmin).first()
+        amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
+        db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
+        db.commit()
+        trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
+        trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
+        return [trans, trans_fee]
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"user not found")
@@ -2385,7 +2385,7 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
 
 def number_of_network_send_airdrop(argument, to_account, ref_user_address): 
     if argument == "bnb":
-        url_e= 'http://localhost:2352/api/v1/bnb/token/send'
+        url_e= 'http://13.235.171.121:2352/api/v1/bnb/token/send'
         body_e = {
             "from_account": "0x0F8B81De674aDFf715762f2B8ae7d2509291B108",
             "to_account": to_account,
@@ -2423,7 +2423,7 @@ def number_of_network_send_airdrop(argument, to_account, ref_user_address):
 def number_of_network_send_token(argument, from_account, to_account, amount, user_privateKey, c_account): 
     if argument =="trx":
         if float(amount) >= 0.001:
-            url= 'http://localhost:2352/api/v1/tron/token/send'
+            url= 'http://13.235.171.121:2352/api/v1/tron/token/send'
             body = {
                 "from_account": from_account,
                 "to_account": to_account,
@@ -2455,7 +2455,7 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
                 "status": 1
             }
             return [wallet_details, fees_details]
-            return response
+            # return response
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"amount is to low")
@@ -2472,7 +2472,7 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
             response_e = requests.post(url_e,json=body_e,headers=headers_e)
             wallet_details_e = response_e.json()
             data_e = {
-                "tx_id" : wallet_details_e,
+                "tx_id" : wallet_details_e["transactionHash"],
                 "amount": amount
             }
             body_e_f = {
@@ -2486,9 +2486,9 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
             fees_details = res_e.json()
             amount_fee_e = amount * 0.01/100
             data_fee_e = {
-                "tx_id" : fees_details,
+                "tx_id" : fees_details["transactionHash"],
                 "amount": amount_fee_e,
-                "status": 1
+                "status": fees_details["status"]
             }
             return [data_e, data_fee_e]
         else:
