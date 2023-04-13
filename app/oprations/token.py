@@ -12,13 +12,11 @@ import requests
 from fastapi import APIRouter, Depends, HTTPException, status
 # from PIL import Image
 from sqlalchemy.orm.session import Session
+from web3 import Web3
 
 from app.config.database import SessionLocal, engine
 from app.models.index import DbToken, DbUser
 from app.schemas.index import Assets, AssetsAdd, AssetsNetwork
-
-# from web3 import Web3
-
 
 
 def get_db():
@@ -258,33 +256,33 @@ def token_transaction_receive(address: str, c_address:str, network: str, db: Ses
     return reacharge_responce
 
 def create_user_token_network(request: AssetsNetwork, db: Session = Depends(get_db)):
-    data = number_of_network_token_add(request.network, request.address, request.token_contect_id)
-    return data
-    # if not data.status_code == 404:      # type: ignore
-        # new_token = DbToken(
-        #     token_name = data["token_name"],              # type: ignore
-        #     token_short_name= data["token_short_name"],   # type: ignore
-        #     token_contect_id = data["token_contect_id"],  # type: ignore
-        #     token_logo = data["token_logo"],              # type: ignore
-        #     token_decimal = data["token_decimal"],        # type: ignore
-        #     token_can_show = data["token_can_show"],      # type: ignore
-        #     token_network = data["token_network"],        # type: ignore
-        #     token_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
-        # )
-        # db.add(new_token)
-        # db.commit()
-        # user = db.query(DbUser).filter(DbUser.user_address == request.address).first()
-        # if user.user_token_id == None:             # type: ignore
-        #     token = str(new_token.token_id)
-        # else:
-        #     token = user.user_token_id+","+str(new_token.token_id)            # type: ignore
-        # db.query(DbUser).filter(DbUser.user_address == request.address).update({"user_token_id": f'{token}'}, synchronize_session='evaluate')
-        # db.commit()
-        # token = db.query(DbToken).filter(DbToken.token_id == new_token.token_id).first()
-        # return token
-    # else:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-    #                         detail=f"token already added")
+    data = number_of_network_token_add(request.network, request.token_contect_id)
+    # return data
+    if not data == "token already added" or not data == "Request failed":      # type: ignore
+        new_token = DbToken(
+            token_name = data["token_name"],              # type: ignore
+            token_short_name= data["token_short_name"],   # type: ignore
+            token_contect_id = data["token_contect_id"],  # type: ignore
+            token_logo = data["token_logo"],              # type: ignore
+            token_decimal = data["token_decimal"],        # type: ignore
+            token_can_show = data["token_can_show"],      # type: ignore
+            token_network = data["token_network"],        # type: ignore
+            token_registration_date_time=datetime.now(pytz.timezone('Asia/Calcutta')),
+        )
+        db.add(new_token)
+        db.commit()
+        user = db.query(DbUser).filter(DbUser.user_address == request.address).first()
+        if user.user_token_id == None:             # type: ignore
+            token = str(new_token.token_id)
+        else:
+            token = user.user_token_id+","+str(new_token.token_id)            # type: ignore
+        db.query(DbUser).filter(DbUser.user_address == request.address).update({"user_token_id": f'{token}'}, synchronize_session='evaluate')
+        db.commit()
+        token = db.query(DbToken).filter(DbToken.token_id == new_token.token_id).first()
+        return token
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"token already added")
 
 
 
@@ -352,7 +350,7 @@ def number_of_network_trans_receive(argument, address, c_address):
         else:
             return []
 
-def number_of_network_token_add(argument, address, c_address): 
+def number_of_network_token_add(argument, c_address): 
     if argument =="trx":
         if not c_address == "TM4q3gujYR7JUaFrZpM8x1P7NbQd6hwJts" and not c_address == "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t":
             url = 'https://apilist.tronscan.org/api/contract?contract='+request.token_contect_id    # type: ignore
@@ -373,38 +371,31 @@ def number_of_network_token_add(argument, address, c_address):
                                 detail=f"token already added")
     elif argument == "bnb":
         if not c_address == "0xd72ad2f5a057A21aA4cA8F7A586eB121e382c14C" and not c_address == "0x2B90E061a517dB2BbD7E39Ef7F733Fd234B494CA":
-        #  # Replace YOUR_API_KEY with your BSCScan API key
-        #     api_key = 'IWFZ9GJ1HMINPGD65Q2GZDDPTJNHJJFEUY'
-
-        #     # Replace CONTRACT_ADDRESS with the contract address you want to retrieve information for
-        #     contract_address = c_address
-
-        #     # Build the URL for the API request
-        #     # url = f'https://api.bscscan.com/api?module=contract&action=getabi&address={contract_address}&apikey={api_key}'
-        #     w3 = Web3(Web3.HTTPProvider('https://bsc-dataseed1.binance.org'))
-
-        #     # Retrieve the contract name, symbol and decimal from the contract instance
-        #     contract = w3.eth.contract(address=contract_address, abi=[])
-        #     contract_name = contract.functions.name().call()
-        #     contract_symbol = contract.functions.symbol().call()
-        #     contract_decimal = contract.functions.decimals().call()
-
-        #     # Build the URL for the contract image
-        #     image_url = f'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/{contract_address}/logo.png'
-
-        #     # Retrieve the contract image
-        #     response = requests.get(image_url)
-        #     image = Image.open(BytesIO(response.content))
-
-        #     # Print the contract details
-        #     print(f'Contract Name: {contract_name}')
-        #     print(f'Contract Symbol: {contract_symbol}')
-        #     print(f'Contract Decimals: {contract_decimal}')
-
-        #     # Show the contract image
-        #     image.show()
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"token already added")
+            api_key = 'IWFZ9GJ1HMINPGD65Q2GZDDPTJNHJJFEUY'
+            contract_address = c_address
+            api_url = f"https://api.bscscan.com/api?module=contract&action=getabi&address={contract_address}&apikey={api_key}"
+            response = requests.get(api_url)
+            if response.status_code == 200:
+                data = response.json()
+                abi = data["result"]
+                w3 = Web3(Web3.HTTPProvider('https://bsc-dataseed.binance.org'))
+                contract = w3.eth.contract(address=contract_address, abi=abi)
+                name = contract.functions.name().call()
+                symbol = contract.functions.symbol().call()
+                decimals = contract.functions.decimals().call()
+                resp = {
+                    'token_name': name,
+                    'token_short_name': symbol,
+                    'token_contect_id': contract_address,
+                    'token_logo': "https://bal-coin.vercel.app/assets/logo/bep20_icon.png",
+                    'token_decimal': decimals,
+                    'token_can_show': 1,
+                    'token_network': "bnb"
+                }   
+                return resp
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Request failed")
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"token already added")
