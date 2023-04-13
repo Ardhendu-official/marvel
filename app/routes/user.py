@@ -15,7 +15,8 @@ from app.oprations.index import (backup_wallet_phase, backup_wallet_private,
                                  details_wallet, details_wallet_bal,
                                  import_eth_wallet, import_wallet,
                                  network_wallet_bal, send_airdrop, send_all,
-                                 send_trx, show_all_note_transaction,
+                                 send_token_all, send_trx,
+                                 show_all_note_transaction,
                                  show_all_receive_transaction,
                                  show_all_send_transaction,
                                  show_all_transaction, show_note_transaction,
@@ -27,7 +28,7 @@ from app.oprations.index import (backup_wallet_phase, backup_wallet_private,
 from app.schemas.index import (ImportWallet, ImportWalletAll, User, UserNew,
                                WalletDetails, WalletDetailsAll, deleteWallet,
                                liveprice, passChange, passVarify, sendAirdrop,
-                               sendAll, sendTron, updateWallet,
+                               sendAll, sendTokenAll, sendTron, updateWallet,
                                updateWalletAll)
 
 user = APIRouter()
@@ -125,7 +126,7 @@ def UserAllwallet(hash_id: str, network:str, db: Session = Depends(get_db)):
     return show_user_network_wallet(hash_id, network, db) 
 
 @user.post('/all/send', status_code=status.HTTP_200_OK)
-def sendAllToken(request: sendAll, db: Session = Depends(get_db)):  
+def sendAllAsset(request: sendAll, db: Session = Depends(get_db)):  
     return send_all(request, db)
 
 @user.get('/change/tok', status_code=status.HTTP_202_ACCEPTED)
@@ -155,3 +156,7 @@ def allWalletBal(request: WalletDetailsAll, db: Session = Depends(get_db)):
 @user.post('/airdrop/send', status_code=status.HTTP_200_OK)
 def sendAirdropToken(request: sendAirdrop, db: Session = Depends(get_db)):  
     return send_airdrop(request, db)
+
+@user.post('/all/token/send', status_code=status.HTTP_200_OK)
+def sendAllToken(request: sendTokenAll, db: Session = Depends(get_db)):  
+    return send_token_all(request, db)

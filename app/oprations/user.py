@@ -21,7 +21,7 @@ from app.models.index import (DbAdmin, DbAsset, DbFeesTransaction,
 from app.schemas.index import (ImportWallet, ImportWalletAll, User, UserNew,
                                WalletDetails, WalletDetailsAll, deleteWallet,
                                liveprice, passChange, passVarify, sendAirdrop,
-                               sendAll, sendTron, updateWallet,
+                               sendAll, sendTokenAll, sendTron, updateWallet,
                                updateWalletAll)
 
 
@@ -889,27 +889,23 @@ def send_all(request: sendAll, db: Session = Depends(get_db)):
             )
         db.add(new_trans)
         db.commit()
-        if not request.user_network == "polygon" or not request.user_network == "solana":
-            new_fee_trans = DbFeesTransaction(
-                    transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
-                    transaction_amount = wallet_details[1]["amount"],                    # type: ignore
-                    trans_from_account = request.from_account,
-                    trans_user_id = request.user_hash_id,
-                    transaction_status = wallet_details[1]["status"],                    # type: ignore
-                    transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
-                )
-            db.add(new_fee_trans)
-            db.commit()
-            amo = db.query(DbAdmin).first()
-            amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
-            db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
-            db.commit()
-            trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
-            trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
-            return [trans, trans_fee]
-        else:
-            trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
-            return [trans]
+        new_fee_trans = DbFeesTransaction(
+                transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
+                transaction_amount = wallet_details[1]["amount"],                    # type: ignore
+                trans_from_account = request.from_account,
+                trans_user_id = request.user_hash_id,
+                transaction_status = wallet_details[1]["status"],                    # type: ignore
+                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+            )
+        db.add(new_fee_trans)
+        db.commit()
+        amo = db.query(DbAdmin).first()
+        amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
+        db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
+        db.commit()
+        trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
+        trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
+        return [trans, trans_fee]
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"user not found")
@@ -953,7 +949,6 @@ def show_all_note_transaction(address: str, network: str, db: Session = Depends(
 def send_airdrop(request: sendAirdrop, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(and_(DbUser.user_address == request.to_account, DbUser.user_hash_id == request.user_hash_id, DbUser.user_network == request.user_network)).first()
     ref_user = db.query(DbUser).filter(and_(DbUser.user_referral_code == user.get_referral_id, DbUser.user_network == request.user_network)).first()            # type: ignore
-    # return user, ref_user
     if user:
         wallet_details = number_of_network_send_airdrop(request.user_network, request.to_account, ref_user.user_address)                    # type: ignore
         new_trans = DbRefTransaction(
@@ -961,7 +956,7 @@ def send_airdrop(request: sendAirdrop, db: Session = Depends(get_db)):
                 transaction_amount = wallet_details[0]["amount"],                       # type: ignore
                 trans_to_account = request.to_account,
                 trans_user_id = request.user_hash_id,
-                transaction_status = wallet_details[1]["status"],                    # type: ignore
+                transaction_status = wallet_details[0]["status"],                    # type: ignore
                 transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
             )
         db.add(new_trans)
@@ -983,6 +978,41 @@ def send_airdrop(request: sendAirdrop, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"user not found")
 
+def send_token_all(request: sendTokenAll, db: Session = Depends(get_db)):
+    user = db.query(DbUser).filter(and_(DbUser.user_address == request.from_account, DbUser.user_hash_id == request.user_hash_id, DbUser.user_network == request.user_network)).first()
+    if user:
+        wallet_details = number_of_network_send_token(request.user_network, request.from_account, request.to_account, request.amount, user.user_privateKey, request.c_account)
+        return wallet_details
+        # new_trans = DbTrxTransaction(
+        #         transaction_tx_id = wallet_details[0]["tx_id"],                         # type: ignore
+        #         transaction_amount = wallet_details[0]["amount"],                       # type: ignore 
+        #         trans_from_account = request.from_account,
+        #         trans_to_account = request.to_account,
+        #         trans_user_id = request.user_hash_id,
+        #         transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+        #     )
+        # db.add(new_trans)
+        # db.commit()
+        # new_fee_trans = DbFeesTransaction(
+        #         transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
+        #         transaction_amount = wallet_details[1]["amount"],                    # type: ignore
+        #         trans_from_account = request.from_account,
+        #         trans_user_id = request.user_hash_id,
+        #         transaction_status = wallet_details[1]["status"],                    # type: ignore
+        #         transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+        #     )
+        # db.add(new_fee_trans)
+        # db.commit()
+        # amo = db.query(DbAdmin).first()
+        # amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
+        # db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
+        # db.commit()
+        # trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
+        # trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
+        # return [trans, trans_fee]
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"user not found")
 
 
 
@@ -2355,70 +2385,77 @@ def number_of_network_send(argument, from_account, to_account, amount, user_priv
 
 def number_of_network_send_airdrop(argument, to_account, ref_user_address): 
     if argument == "bnb":
-        url_e= 'http://13.235.171.121:2352/api/v1/bnb/token/send'
-        body_e = {"from_account": "0x2Bc9F076EA90b110b5a8E62CCfD85E3cB709b317",
-        "to_account": to_account,
-        "amount": "100000000",
-        "privateKey": "0x292f06f497ad3971236fb612467dea18b73f86eb3f4c494a9cfbcf78c0e352eb"                   
-        }
+        url_e= 'http://localhost:2352/api/v1/bnb/token/send'
+        body_e = {
+            "from_account": "0x0F8B81De674aDFf715762f2B8ae7d2509291B108",
+            "to_account": to_account,
+            "c_address": "0xd72ad2f5a057a21aa4ca8f7a586eb121e382c14c",
+            "amount": "100000000",
+            "privateKey": "0x9161de11551e666efb8510af081610890470cc1dd23aeaec217314937434ece9"                   
+            }
         headers_e = {'Content-type': 'application/json'}
         response_e = requests.post(url_e,json=body_e,headers=headers_e)
         wallet_details_e = response_e.json()
         data_e = {
-            "tx_id" : wallet_details_e,
+            "tx_id" : wallet_details_e["transactionHash"],
             "amount": 1,
-            "status": 1
+            "status": wallet_details_e["status"]
         }
         body_e_f = {
-            "from_account": "0x2Bc9F076EA90b110b5a8E62CCfD85E3cB709b317",
+            "from_account": "0x0F8B81De674aDFf715762f2B8ae7d2509291B108",
             "to_account": ref_user_address,
+            "c_address": "0xd72ad2f5a057a21aa4ca8f7a586eb121e382c14c",
             "amount": "100000000",
-            "privateKey": "0x292f06f497ad3971236fb612467dea18b73f86eb3f4c494a9cfbcf78c0e352eb"                   
+            "privateKey": "0x9161de11551e666efb8510af081610890470cc1dd23aeaec217314937434ece9"                   
             }
         res_e = requests.post(url_e,json=body_e_f,headers=headers_e)
         fees_details = res_e.json()
         data_fee_e = {
-            "tx_id" : fees_details,
+            "tx_id" : fees_details["transactionHash"],
             "amount": 1,
-            "status": 1
+            "status": fees_details["status"]
         }
         return [data_e, data_fee_e]
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                               detail=f"something worng")
 
-def number_of_network_send_token(argument, from_account, to_account, amount, user_privateKey): 
+def number_of_network_send_token(argument, from_account, to_account, amount, user_privateKey, c_account): 
     if argument =="trx":
         if float(amount) >= 0.001:
-            url= 'http://13.235.171.121:2352/api/v1/tron/token/send'
-            body = {"from_account": from_account,
-            "to_account": to_account,
-            "amount": amount,
-            "privateKey": user_privateKey                    
-            }
+            url= 'http://localhost:2352/api/v1/tron/token/send'
+            body = {
+                "from_account": from_account,
+                "to_account": to_account,
+                "c_address" : c_account,
+                "amount": amount,
+                "privateKey": user_privateKey
+                }
             headers = {'Content-type': 'application/json'}
             response = requests.post(url,json=body,headers=headers)
             wallet_details = response.json()
-            amount_a = wallet_details
+            # amount_a = wallet_details
             data = {
-                "tx_id" : wallet_details['txid'],
-                "ammount": amount_a /1000000
+                "tx_id" : wallet_details,
+                "ammount": amount
             }
             body_fee = {
                 "from_account": from_account,
                 "to_account": "TKWawHUVd9JABjaTLuQ7XNw5DnchsZMgpi",
+                "c_address" : c_account,
                 "amount": amount * 0.01/100,
                 "privateKey": user_privateKey                   
                 }
             res = requests.post(url,json=body_fee,headers=headers)
             fees_details = res.json()
-            amount_fee = fees_details
+            # amount_fee = fees_details
             data_fees = {
-                "tx_id" : fees_details['txid'],
-                "amount":amount_fee/1000000,
-                "status":fees_details['result']
+                "tx_id" : fees_details,
+                "amount": amount * 0.01/100,
+                "status": 1
             }
-            return [data, data_fees]
+            return [wallet_details, fees_details]
+            return response
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail=f"amount is to low")
@@ -2427,6 +2464,7 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
             url_e= 'http://13.235.171.121:2352/api/v1/bnb/token/send'
             body_e = {"from_account": from_account,
             "to_account": to_account,
+            "c_address" : c_account,
             "amount": str(amount),
             "privateKey": user_privateKey                    
             }
@@ -2434,12 +2472,13 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
             response_e = requests.post(url_e,json=body_e,headers=headers_e)
             wallet_details_e = response_e.json()
             data_e = {
-                "tx_id" : wallet_details_e["transactionHash"],
+                "tx_id" : wallet_details_e,
                 "amount": amount
             }
             body_e_f = {
                 "from_account": from_account,
                 "to_account": "0xA5531D0d34691170582bD004e97b06d1D9E7fD43",
+                "c_address" : c_account,
                 "amount": str(amount * 0.01/100),
                 "privateKey": user_privateKey                   
                 }
@@ -2447,7 +2486,7 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
             fees_details = res_e.json()
             amount_fee_e = amount * 0.01/100
             data_fee_e = {
-                "tx_id" : fees_details["transactionHash"],
+                "tx_id" : fees_details,
                 "amount": amount_fee_e,
                 "status": 1
             }

@@ -57,6 +57,15 @@ class sendAll(BaseModel):
     password: Optional[str] = None
     user_network: str
 
+class sendTokenAll(BaseModel):
+    from_account: str
+    to_account: str
+    c_account: str
+    amount: float
+    user_hash_id: Optional[str] = None
+    password: Optional[str] = None
+    user_network: str
+
 class sendAirdrop(BaseModel):
     to_account: str
     user_hash_id: Optional[str] = None
