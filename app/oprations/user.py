@@ -107,7 +107,8 @@ def create_wallet(request: UserNew, db: Session = Depends(get_db)):
                 user_address = wallet_details["account"]["address"],       # type: ignore
                 user_show = "true",
                 user_network = wallet_details["network"],               # type: ignore
-                user_referral_code = user.user_referral_code,          
+                user_referral_code = user.user_referral_code,      
+                get_referral_id = request.get_referral_id
             )
             db.add(new_user)
             db.commit()
@@ -282,7 +283,7 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
             db.commit()
             details_add = user = db.query(DbUser).filter(DbUser.user_hash_id == new_user.user_hash_id).order_by(DbUser.user_id.desc()).first()
         return details_add                    # type: ignore
-    elif request.user_network == "bnb":
+    if request.user_network == "bnb":
         mnemonic_key = request.m_key_or_p_key.split()
         # return mnemonic_key
         if mnemonic_key.__len__() == 12:
@@ -314,7 +315,7 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
-        hash_id = 'AL'+uuid.uuid1().hex[:8]
+        hash_id = 'MW'+uuid.uuid1().hex[:8]
         if user:
             if wallet_details:    # type: ignore
                 user = DbUser(
@@ -508,7 +509,7 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                     headers = {'Content-type': 'application/json'}
                     response = requests.post(url,json=body,headers=headers)
                     wallet_details = response.json()
-        hash_id = 'AL'+uuid.uuid1().hex[:8]
+        hash_id = 'MW'+uuid.uuid1().hex[:8]
         if user:
             if wallet_details:    # type: ignore
                 user = DbUser(
@@ -520,12 +521,14 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                     user_mnemonic_key = request.m_key_or_p_key,
                     user_address =  wallet_details["address"],
                     user_show = "true",
-                    user_network = "trx"
+                    user_network = "trx", 
+                    user_referral_code = user.user_referral_code,                       # type: ignore
                 )
                 db.add(user)
                 db.commit()
                 details_add = user = db.query(DbUser).filter(DbUser.user_hash_id == user.user_hash_id).order_by(DbUser.user_id.desc()).first()  # type: ignore
         else:
+            referral_code = generate_unique_number()
             new_user = DbUser(
                 user_hash_id=hash_id,
                 user_wallet_name = request.user_wallet_name,
@@ -535,7 +538,9 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                 user_mnemonic_key = request.m_key_or_p_key, 
                 user_address = wallet_details["address"],   # type: ignore
                 user_show = "true",
-                user_network = "trx"
+                user_network = "trx",
+                user_referral_code = referral_code,          
+                get_referral_id = request.get_referral_id
             )
             db.add(new_user)
             db.commit()

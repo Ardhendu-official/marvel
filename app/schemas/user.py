@@ -28,6 +28,7 @@ class ImportWalletAll(BaseModel):
     user_hash_id: Optional[str] = None
     user_password: str
     user_network: str
+    get_referral_id: Optional[str] = None
 
 class WalletDetails(BaseModel):
     user_hash_id: Optional[str] = None
