@@ -876,7 +876,8 @@ def show_user_network_wallet(hash_id: str, network: str , db: Session = Depends(
                 "user_registration_date_time": u_detalis.user_registration_date_time,
                 "token_balance": wallet_details['balance'], 
                 "user_show": u_detalis.user_show,
-                "user_network": network
+                "user_network": network,
+                "user_referral_code": u_detalis.user_referral_code
             }
             data.append(dtl)
         return data
