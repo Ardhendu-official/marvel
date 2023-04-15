@@ -114,7 +114,7 @@ def create_wallet(request: UserNew, db: Session = Depends(get_db)):
             db.commit()
             details = db.query(DbUser).filter(DbUser.user_hash_id == new_user.user_hash_id).order_by(DbUser.user_id.desc()).first()
     else:
-        if request.user_network =='bnb':
+        if request.user_network =='trx':
             user = DbUser(
                 user_hash_id= hash_id,
                 user_wallet_name = request.user_wallet_name,
@@ -327,12 +327,14 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                     user_mnemonic_key = request.m_key_or_p_key,
                     user_address =  wallet_details["address"],
                     user_show = "true",
-                    user_network = "bnb"
+                    user_network = "bnb",
+                    user_referral_code = user.user_referral_code,                       # type: ignore
                 )
                 db.add(user)
                 db.commit()
                 details_add = user = db.query(DbUser).filter(DbUser.user_hash_id == user.user_hash_id).order_by(DbUser.user_id.desc()).first()  # type: ignore
         else:
+            referral_code = generate_unique_number()
             new_user = DbUser(
                 user_hash_id=hash_id,
                 user_wallet_name = request.user_wallet_name,
@@ -342,7 +344,9 @@ def import_eth_wallet(request: ImportWalletAll, db: Session = Depends(get_db)):
                 user_mnemonic_key = request.m_key_or_p_key, 
                 user_address = wallet_details["address"],   # type: ignore
                 user_show = "true",
-                user_network = "bnb"
+                user_network = "bnb",
+                user_referral_code = referral_code,          
+                get_referral_id = request.get_referral_id
             )
             db.add(new_user)
             db.commit()
