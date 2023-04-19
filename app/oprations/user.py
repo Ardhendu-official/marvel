@@ -992,34 +992,37 @@ def send_token_all(request: sendTokenAll, db: Session = Depends(get_db)):
     user = db.query(DbUser).filter(and_(DbUser.user_address == request.from_account, DbUser.user_hash_id == request.user_hash_id, DbUser.user_network == request.user_network)).first()
     if user:
         wallet_details = number_of_network_send_token(request.user_network, request.from_account, request.to_account, request.amount, user.user_privateKey, request.c_account)
-        # return wallet_details
-        new_trans = DbTrxTransaction(
-                transaction_tx_id = wallet_details[0]["tx_id"],                         # type: ignore
-                transaction_amount = wallet_details[0]["amount"],                       # type: ignore 
-                trans_from_account = request.from_account,
-                trans_to_account = request.to_account,
-                trans_user_id = request.user_hash_id,
-                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
-            )
-        db.add(new_trans)
-        db.commit()
-        new_fee_trans = DbFeesTransaction(
-                transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
-                transaction_amount = wallet_details[1]["amount"],                    # type: ignore
-                trans_from_account = request.from_account,
-                trans_user_id = request.user_hash_id,
-                transaction_status = wallet_details[1]["status"],                    # type: ignore
-                transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
-            )
-        db.add(new_fee_trans)
-        db.commit()
-        amo = db.query(DbAdmin).first()
-        amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
-        db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
-        db.commit()
-        trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
-        trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
-        return [trans, trans_fee]
+        # return wallet_details[0]["tx_id"]
+        if not "error" in wallet_details[0]["tx_id"]:                            # type: ignore
+            new_trans = DbTrxTransaction(
+                    transaction_tx_id = wallet_details[0]["tx_id"],                         # type: ignore
+                    transaction_amount = wallet_details[0]["amount"],                       # type: ignore 
+                    trans_from_account = request.from_account,
+                    trans_to_account = request.to_account,
+                    trans_user_id = request.user_hash_id,
+                    transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+                )
+            db.add(new_trans)
+            db.commit()
+            new_fee_trans = DbFeesTransaction(
+                    transaction_tx_id = wallet_details[1]["tx_id"],                    # type: ignore
+                    transaction_amount = wallet_details[1]["amount"],                    # type: ignore
+                    trans_from_account = request.from_account,
+                    trans_user_id = request.user_hash_id,
+                    transaction_status = wallet_details[1]["status"],                    # type: ignore
+                    transaction_date_time = datetime.now(pytz.timezone('Asia/Calcutta')),
+                )
+            db.add(new_fee_trans)
+            db.commit()
+            amo = db.query(DbAdmin).first()
+            amo_amount = amo.admin_comission + wallet_details[1]["amount"]/1000000                     # type: ignore
+            db.query(DbAdmin).update({"admin_comission": f'{amo_amount}'}, synchronize_session='evaluate')
+            db.commit()
+            trans_fee = db.query(DbFeesTransaction).filter(DbFeesTransaction.transaction_id == new_fee_trans.transaction_id).first()
+            trans = db.query(DbTrxTransaction).filter(DbTrxTransaction.transaction_id == new_trans.transaction_id).first()
+            return [trans, trans_fee]
+        else:
+            return wallet_details[0]["tx_id"]                 # type: ignore
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"user not found")
@@ -2447,7 +2450,7 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
             # amount_a = wallet_details
             data = {
                 "tx_id" : wallet_details,
-                "ammount": amount
+                "amount": amount
             }
             body_fee = {
                 "from_account": from_account,
@@ -2464,7 +2467,7 @@ def number_of_network_send_token(argument, from_account, to_account, amount, use
                 "amount": amount * 0.01/100,
                 "status": 1
             }
-            return [wallet_details, fees_details]
+            return [data, data_fees]
             # return response
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
